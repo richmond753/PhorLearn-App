@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>PhorLearn SHS — Project Documentation</title>
+<style>
+  :root {
+    --ink: #0D0F1A;
+    --ink2: #2D3150;
+    --muted: #6B7280;
+    --line: #E4E6EF;
+    --faint: #F4F5F9;
+    --brand: #1B4FD8;
+    --brand-lt: #EEF2FF;
+    --gold: #D4A017;
+    --success: #16A34A;
+    --danger: #DC2626;
+  }
+
+  @page {
+    size: A4;
+    margin: 18mm 16mm 16mm 16mm;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    font-size: 11pt;
+    line-height: 1.55;
+    margin: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3, h4 { color: var(--ink); line-height: 1.25; }
+  h1 { font-size: 21pt; margin: 0 0 6px; }
+  h2 {
+    font-size: 16pt;
+    margin: 28px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 3px solid var(--brand);
+  }
+  h3 { font-size: 12.5pt; margin: 18px 0 6px; color: var(--brand); }
+  h4 { font-size: 11pt; margin: 12px 0 4px; color: var(--ink2); }
+  p { margin: 6px 0; }
+  ul, ol { margin: 6px 0 10px; padding-left: 20px; }
+  li { margin: 3px 0; }
+  a { color: var(--brand); text-decoration: none; }
+  strong { color: var(--ink); }
+  code {
+    background: var(--faint);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 9.5pt;
+    color: var(--ink2);
+  }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: var(--brand);
+  }
+
+  /* Cover page */
+  .cover {
+    height: 252mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    page-break-after: always;
+    background: var(--ink);
+    color: #fff;
+    margin: -18mm -16mm 0 -16mm;
+    padding: 0 22mm;
+  }
+  .cover .logo { font-size: 15pt; font-weight: 800; letter-spacing: -.3px; }
+  .cover .badge {
+    display: inline-block; background: var(--brand); color: #fff;
+    border-radius: 99px; padding: 3px 12px; font-size: 8pt; font-weight: 700;
+    letter-spacing: 1.5px; margin-left: 8px; vertical-align: middle;
+  }
+  .cover h1 {
+    color: #fff; font-size: 40pt; line-height: 1.05; margin: 26px 0 14px; font-weight: 800;
+  }
+  .cover .sub { color: rgba(255,255,255,.72); font-size: 13pt; max-width: 150mm; }
+  .cover .meta {
+    margin-top: 46px; color: rgba(255,255,255,.6); font-size: 10pt;
+    border-top: 1px solid rgba(255,255,255,.18); padding-top: 16px;
+  }
+  .cover .meta b { color: #fff; font-weight: 600; }
+  .accent { color: #6f97ff; }
+
+  section { page-break-before: always; }
+  section.nobreak { page-break-before: avoid; }
+
+  /* Cards & boxes */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: #fff;
+    break-inside: avoid;
+  }
+  .card h4 { margin-top: 0; }
+  .tag {
+    display:inline-block; background: var(--brand-lt); color: var(--brand);
+    border-radius:99px; padding:2px 10px; font-size:8.5pt; font-weight:700; margin: 0 4px 4px 0;
+  }
+  .callout {
+    border-left: 4px solid var(--brand);
+    background: var(--brand-lt);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
+    break-inside: avoid;
+  }
+  .callout.gold { border-color: var(--gold); background: #FFF8E1; }
+  .callout.green { border-color: var(--success); background: #F0FDF4; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10pt; }
+  th, td { text-align: left; padding: 7px 9px; border: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--faint); font-size: 9pt; text-transform: uppercase; letter-spacing: .5px; color: var(--ink2); }
+  tr { break-inside: avoid; }
+
+  .toc { font-size: 11pt; }
+  .toc div { display:flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+  .toc .n { color: var(--muted); }
+
+  .feature { break-inside: avoid; margin: 14px 0; }
+  .feature .label { font-size: 8.5pt; font-weight:700; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); }
+  .pathline { font-family: "Consolas", monospace; font-size: 9pt; color: var(--muted); }
+  .muted { color: var(--muted); }
+  .small { font-size: 9.5pt; }
+  footer.note { margin-top: 30px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9pt; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="logo">⭐ PhorLearn <span class="badge">SHS</span></div>
+  <h1>Project Documentation<br><span class="accent">&amp; Technical Dossier</span></h1>
+  <div class="sub">
+    A focused, WASSCE-ready study platform for Ghanaian Senior High School students —
+    with role-based dashboards, real past questions, an AI study tutor, curated
+    national curriculum resources, and an interactive health-education hub.
+  </div>
+  <div class="meta">
+    <b>Product:</b> PhorLearn SHS &nbsp;·&nbsp; <b>Event:</b> Hackathon &rsquo;26 &nbsp;·&nbsp;
+    <b>Stack:</b> Next.js 15 · React 19 · TypeScript · MySQL 8 · Tailwind CSS · Google Gemini<br>
+    <b>Audience:</b> SHS students (15–18), teachers, parents/guardians, administrators
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<section class="nobreak">
+  <p class="eyebrow">Contents</p>
+  <h1>Table of Contents</h1>
+  <div class="toc">
+    <div><span>1. Executive Summary</span><span class="n">03</span></div>
+    <div><span>2. Problem Statement</span><span class="n">03</span></div>
+    <div><span>3. The Solution</span><span class="n">04</span></div>
+    <div><span>4. Product Design Requirements (PDR)</span><span class="n">05</span></div>
+    <div><span>5. Technology Stack</span><span class="n">07</span></div>
+    <div><span>6. System Architecture</span><span class="n">08</span></div>
+    <div><span>7. Comprehensive App Walkthrough</span><span class="n">09</span></div>
+    <div><span>8. Data Model (Database Schema)</span><span class="n">14</span></div>
+    <div><span>9. Quality, Usability &amp; Accessibility</span><span class="n">15</span></div>
+    <div><span>10. Security Considerations</span><span class="n">16</span></div>
+    <div><span>11. Setup &amp; Running the App</span><span class="n">16</span></div>
+    <div><span>12. Future Roadmap</span><span class="n">17</span></div>
+  </div>
+</section>
+
+<!-- ============ 1 EXEC SUMMARY ============ -->
+<section>
+  <p class="eyebrow">Overview</p>
+  <h1>1. Executive Summary</h1>
+  <p>
+    <strong>PhorLearn SHS</strong> is a full-stack web application that helps Ghanaian Senior
+    High School students prepare for the <strong>WASSCE</strong> (West African Senior School
+    Certificate Examination). It deliberately narrows its focus to the SHS level so the
+    experience feels serious and exam-driven rather than playful — clean typography, dark
+    accents, and a professional tone an SHS3 student cramming for finals would actually trust.
+  </p>
+  <p>
+    The platform serves four roles — <strong>Student, Teacher, Parent/Guardian, and Admin</strong> —
+    each with a tailored dashboard. Students get lessons, real past-question papers with timed
+    quizzes and instant feedback, an AI Study Helper, a curated resource library of official
+    NaCCA/WAEC materials, career guidance, and an interactive Health &amp; Wellness hub. Teachers
+    manage classes, set assignments and upload lessons. Parents monitor a ward&rsquo;s performance.
+    Admins see platform-wide statistics.
+  </p>
+  <div class="callout green">
+    <strong>At a glance:</strong> 4 user roles · 8+ subjects · timed WASSCE papers with a closed
+    data-loop into progress tracking · context-aware AI tutoring · curated national-curriculum
+    resources · full keyboard &amp; screen-reader accessibility pass.
+  </div>
+</section>
+
+<!-- ============ 2 PROBLEM ============ -->
+<section class="nobreak">
+  <p class="eyebrow">Why this exists</p>
+  <h1>2. Problem Statement</h1>
+  <p>
+    SHS students in Ghana face a high-stakes terminal exam (WASSCE) but study with fragmented,
+    low-quality tools. The specific pain points the project targets:
+  </p>
+  <ul>
+    <li><strong>Scattered resources.</strong> Past questions, syllabi and notes are spread across
+      random websites, WhatsApp groups and photocopies — hard to trust and hard to find.</li>
+    <li><strong>No instant feedback.</strong> Students practise questions without knowing why an
+      answer is right or wrong, so mistakes are repeated.</li>
+    <li><strong>Limited access to help.</strong> One teacher to many students means individual
+      questions often go unanswered, especially after school hours.</li>
+    <li><strong>Weak progress visibility.</strong> Students, parents and teachers rarely have a
+      shared, data-driven picture of where a learner actually stands.</li>
+    <li><strong>Generic ed-tech.</strong> Most apps are built for younger learners or non-Ghanaian
+      curricula, with playful UIs that don&rsquo;t respect a 15–18 year-old preparing for a national exam.</li>
+    <li><strong>Health literacy gap.</strong> Wellbeing and human-biology knowledge are often taught
+      as dry text, losing students who don&rsquo;t enjoy reading.</li>
+  </ul>
+</section>
+
+<!-- ============ 3 SOLUTION ============ -->
+<section>
+  <p class="eyebrow">What we built</p>
+  <h1>3. The Solution</h1>
+  <p>PhorLearn answers each problem with a focused, integrated feature:</p>
+  <table>
+    <thead><tr><th style="width:42%">Problem</th><th>PhorLearn solution</th></tr></thead>
+    <tbody>
+      <tr><td>Scattered resources</td><td>A curated <strong>Resource Library</strong> of verified NaCCA curriculum, WAEC past papers, teacher manuals and video lessons — searchable and filterable, organised per subject.</td></tr>
+      <tr><td>No instant feedback</td><td><strong>Timed past-question quizzes</strong> mark each answer instantly, show the correct option and a plain-language explanation, then a full review screen.</td></tr>
+      <tr><td>Limited access to help</td><td>A context-aware <strong>AI Study Helper</strong> (Google Gemini) embedded in every lesson, knowing the current subject &amp; topic, available any time and free.</td></tr>
+      <tr><td>Weak progress visibility</td><td>Quizzes feed a <strong>closed data loop</strong> — updating subject progress, weekly stats, quiz averages and achievements — surfaced on student, parent and teacher dashboards.</td></tr>
+      <tr><td>Generic ed-tech</td><td>An <strong>SHS-only</strong>, professional UI in real Ghanaian curriculum language (WASSCE, NaCCA, programmes, SHS1–3).</td></tr>
+      <tr><td>Health literacy gap</td><td>An interactive <strong>Health &amp; Wellness</strong> hub — tap-to-explore body systems, an exercise plan, nutrition with local foods, and a myth-buster game.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 4 PDR ============ -->
+<section>
+  <p class="eyebrow">Specification</p>
+  <h1>4. Product Design Requirements (PDR)</h1>
+
+  <h3>4.1 Scope &amp; tone</h3>
+  <p>SHS-only. No crèche/nursery/primary/JHS flows, no education-level selection, no kid-friendly UI.
+    The tone is a serious study platform: dark accents, clean typography, professional.</p>
+
+  <h3>4.2 Target users (roles)</h3>
+  <table>
+    <thead><tr><th>Role</th><th>Primary goal</th></tr></thead>
+    <tbody>
+      <tr><td>🎒 Student</td><td>Learn, practise past questions, get AI help, track progress.</td></tr>
+      <tr><td>🖊️ Teacher</td><td>Manage a class, set assignments, upload lessons, view performance.</td></tr>
+      <tr><td>👨‍👩‍👦 Parent / Guardian</td><td>Monitor a ward&rsquo;s performance, activity and focus areas.</td></tr>
+      <tr><td>🛡️ Admin</td><td>Oversee platform stats, users and content.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 Screen inventory</h3>
+  <ul>
+    <li>Welcome / role selection &rarr; Sign up &rarr; Log in</li>
+    <li>Role dashboards: Student, Teacher, Parent, Admin</li>
+    <li>Subject Hub &rarr; Lessons (with AI Study Helper)</li>
+    <li>Past Questions (paper list &rarr; timed quiz &rarr; results &amp; review)</li>
+    <li>Resource Library · Health &amp; Wellness · Career Guidance · Progress</li>
+    <li>Profile (avatar upload) · Help / FAQ</li>
+    <li>System: custom 404, error boundary, loading skeleton</li>
+  </ul>
+
+  <h3>4.4 Functional requirements</h3>
+  <ul>
+    <li><strong>Auth:</strong> email/password sign up &amp; login, role chosen at signup, sessions persisted; protected routes redirect unauthenticated users to login.</li>
+    <li><strong>Student dashboard:</strong> subject progress bars, WASSCE countdown, weekly stats (lessons, study time, quiz average), upcoming homework, quick actions.</li>
+    <li><strong>Past questions:</strong> papers by subject &amp; year; one question at a time; A–D options; instant marking + explanation; score + timer; review; attempt history stored.</li>
+    <li><strong>Data loop:</strong> finishing a quiz recomputes quiz average, updates subject progress, and unlocks achievements.</li>
+    <li><strong>AI Study Helper:</strong> subject/topic-aware system prompt, chat history persisted per topic, loading and error/retry states.</li>
+    <li><strong>Teacher:</strong> class roster with performance bars, class average, assignment list; set assignment &amp; upload lesson forms.</li>
+    <li><strong>Parent:</strong> ward subject performance, weekly activity, focus-area warnings (&lt;65%), email report action.</li>
+    <li><strong>Admin:</strong> platform stats, user breakdown by class level, top subjects table.</li>
+  </ul>
+
+  <h3>4.5 Non-functional requirements</h3>
+  <ul>
+    <li><strong>Usability:</strong> validated against Nielsen&rsquo;s 10 Heuristics and Shneiderman&rsquo;s 8 Golden Rules.</li>
+    <li><strong>Accessibility:</strong> keyboard focus, ARIA live regions/labels, skip-link, reduced-motion, label associations.</li>
+    <li><strong>Performance:</strong> server components + route-level loading skeletons; small client bundles.</li>
+    <li><strong>Security:</strong> hashed passwords, signed httpOnly session cookies, server-side route guards, server-protected AI key with rate-limiting.</li>
+    <li><strong>Maintainability:</strong> typed data layer, content kept in structured TypeScript datasets.</li>
+  </ul>
+</section>
+
+<!-- ============ 5 TECH STACK ============ -->
+<section>
+  <p class="eyebrow">Engineering</p>
+  <h1>5. Technology Stack</h1>
+  <table>
+    <thead><tr><th style="width:26%">Layer</th><th style="width:30%">Technology</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Framework</td><td>Next.js 15 (App Router)</td><td>Server components, server actions, API routes, middleware, file-based routing.</td></tr>
+      <tr><td>UI library</td><td>React 19</td><td>Component model; client components for interactive widgets.</td></tr>
+      <tr><td>Language</td><td>TypeScript</td><td>Type-safety across data layer, content datasets and components.</td></tr>
+      <tr><td>Styling</td><td>Tailwind CSS 3</td><td>Token-driven design system (custom ink/brand/gold/success/danger palette).</td></tr>
+      <tr><td>Database</td><td>MySQL 8.0</td><td>Relational store for users, profiles and all app data.</td></tr>
+      <tr><td>DB driver</td><td>mysql2 (promise pool)</td><td>Connection pooling + a small Supabase-style query-builder shim.</td></tr>
+      <tr><td>Auth</td><td>jose (JWT, HS256) + bcryptjs</td><td>Signed httpOnly session cookies; bcrypt password hashing.</td></tr>
+      <tr><td>AI</td><td>Google Gemini (gemini-2.5-flash)</td><td>Free-tier, context-aware study tutoring via a secured server route.</td></tr>
+      <tr><td>Runtime/tooling</td><td>Node.js · npm · ESLint</td><td>Build, lint and dev server.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>Architectural note:</strong> the project originally targeted Supabase (Postgres) and was
+    migrated to <strong>MySQL + custom JWT auth</strong>. A query-builder shim (<code>lib/db/queryBuilder.ts</code>)
+    preserves a Supabase-like <code>.from().select().eq()</code> API so page code stayed largely unchanged
+    through the migration.
+  </div>
+</section>
+
+<!-- ============ 6 ARCHITECTURE ============ -->
+<section>
+  <p class="eyebrow">How it fits together</p>
+  <h1>6. System Architecture</h1>
+
+  <h3>6.1 Request &amp; auth flow</h3>
+  <ol>
+    <li>A visitor signs up (choosing a role) or logs in. The server action hashes/verifies the password with <strong>bcrypt</strong>.</li>
+    <li>On success, a <strong>JWT session</strong> is signed (HS256, via <code>jose</code>) and stored in a signed <strong>httpOnly cookie</strong>.</li>
+    <li><strong>Middleware</strong> verifies the session on every <code>/dashboard/*</code> request and redirects unauthenticated users to <code>/login</code>.</li>
+    <li>Server components call <code>requireProfile()</code> which reads the session and loads the user&rsquo;s profile/role, redirecting if the role doesn&rsquo;t match the page.</li>
+  </ol>
+
+  <h3>6.2 Data layer</h3>
+  <p>A singleton <strong>mysql2 connection pool</strong> (<code>lib/db/pool.ts</code>) backs a typed
+    <code>query()</code> helper. A lightweight <strong>query-builder shim</strong> mirrors the Supabase API so
+    pages read data declaratively. Per-user demo data is seeded programmatically on signup (<code>lib/seed.ts</code>).</p>
+
+  <h3>6.3 Content layer</h3>
+  <p>Curriculum content lives in structured, typed datasets rather than the database, making it easy to
+    review and extend: <code>lib/lessons.ts</code>, <code>lib/pastQuestions.ts</code>,
+    <code>lib/resources.ts</code>, <code>lib/careers.ts</code>, <code>lib/health.ts</code>.</p>
+
+  <h3>6.4 AI integration</h3>
+  <p>The browser never sees the Gemini key. The chat widget calls an internal route
+    (<code>/api/chat</code>) that authenticates the user, applies <strong>in-memory rate-limiting</strong>,
+    injects a WASSCE-focused system prompt with the current subject/topic, calls Gemini server-side, and
+    persists the turn to <code>chat_messages</code>.</p>
+</section>
+
+<!-- ============ 7 WALKTHROUGH ============ -->
+<section>
+  <p class="eyebrow">Guided tour</p>
+  <h1>7. Comprehensive App Walkthrough</h1>
+  <p class="muted">Every part of the app, what it does, and what you should know about it.</p>
+
+  <div class="feature">
+    <div class="label">Onboarding</div>
+    <h3>7.1 Role selection, Sign up &amp; Log in</h3>
+    <p class="pathline">/signup · /login</p>
+    <p>Signup is framed as <strong>Step 1</strong>: the user picks a role from four cards, then fills a form.
+      Students additionally choose their <strong>class (SHS1–3)</strong> and <strong>programme</strong>
+      (e.g. General Science). Passwords require a minimum length, a <strong>confirm-password</strong> field with
+      live match-checking, and a show/hide toggle. On success a session is created and the user lands on their
+      role&rsquo;s dashboard.</p>
+    <p><strong>Know this:</strong> the role chosen at signup determines which dashboard and navigation the user sees for the whole session.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Student · Home</div>
+    <h3>7.2 Student Dashboard</h3>
+    <p class="pathline">/dashboard/student</p>
+    <p>The student&rsquo;s control centre, fully data-driven. It shows: a <strong>WASSCE countdown</strong>,
+      <strong>“Continue Studying”</strong> subject-progress bars (each deep-links to that subject&rsquo;s lessons),
+      <strong>upcoming homework</strong>, a <strong>“This Week”</strong> stats panel (lessons done, study time, average
+      quiz score), and <strong>Quick Actions</strong> to every major area. Empty states are friendly when a new
+      account has no data yet.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Learning</div>
+    <h3>7.3 Subject Hub &amp; Lessons</h3>
+    <p class="pathline">/dashboard/student/subjects · /dashboard/student/subjects/[subject]</p>
+    <p>The Subject Hub lists <strong>Core</strong> and <strong>Elective</strong> subjects as cards
+      (English, Core &amp; Elective Maths, Integrated Science, Social Studies, ICT, Biology, Chemistry, Physics).
+      Opening a subject shows a <strong>topic sidebar</strong> and a lesson area with notes and worked examples,
+      a <strong>Study Resources</strong> panel, and resource buttons (Video, Download Notes, Practice Quiz that
+      deep-links to the matching past paper).</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">AI tutoring</div>
+    <h3>7.4 AI Study Helper</h3>
+    <p class="pathline">embedded on every lesson page · /api/chat</p>
+    <p>A side-panel chat that already knows the <strong>subject and topic</strong> being studied, so answers are
+      WASSCE-specific and concise. It shows <strong>suggested starter prompts</strong>, chat bubbles, a typing
+      indicator, graceful error handling with <strong>Retry</strong>, and <strong>persists history per topic</strong>
+      so each topic keeps its own thread.</p>
+    <p><strong>Know this:</strong> it&rsquo;s free (Gemini free tier) and the API key is protected server-side.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Practice</div>
+    <h3>7.5 Past Questions &amp; Timed Quiz</h3>
+    <p class="pathline">/dashboard/student/past-questions · …/[subject]/[year]</p>
+    <p>Pick a subject and year (papers tagged <em>Official paper</em> vs <em>Exam-style</em>, with a legend),
+      plus official download links (NaCCA syllabus, real WAEC PDFs). The quiz presents one question at a time with a
+      <strong>countdown timer</strong>, <strong>progress bar</strong> and running score. Each answer is marked
+      <strong>instantly</strong> with the correct option and an explanation. At the end you get a
+      <strong>score, save confirmation and a full review</strong>.</p>
+    <p><strong>Know this:</strong> progress is <strong>saved to the browser</strong> (survives refresh), you can move
+      <strong>back to previous questions</strong>, use <strong>keyboard shortcuts</strong> (A–D, ← / →, Enter), and a
+      <strong>leave-page guard</strong> warns before you abandon a live quiz. Submitting recomputes your average and
+      updates subject progress.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Reference</div>
+    <h3>7.6 Resource Library</h3>
+    <p class="pathline">/dashboard/student/resources</p>
+    <p>A curated, verified set of Ghanaian SHS study materials grouped by subject — the official
+      <strong>NaCCA curriculum</strong>, <strong>WAEC past papers</strong>, teacher manuals and video lessons.
+      A <strong>search box</strong> and <strong>type filters</strong> (Curriculum / Past Questions / Textbooks / Videos)
+      make it easy to find a specific resource, with a no-results state.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Wellbeing</div>
+    <h3>7.7 Health &amp; Wellness Hub</h3>
+    <p class="pathline">/dashboard/student/health</p>
+    <p>An interactive, &ldquo;less-reading, more-discovering&rdquo; module with five tabs:
+      <strong>Body Systems</strong> (tap a system to reveal its job, key organs, a wow-fact and care tips),
+      <strong>Move &amp; Exercise</strong> (WHO 60-min guidance, exercise groups with reps, a 7-day plan),
+      <strong>Eat Well</strong> (food groups with familiar Ghanaian foods), <strong>Mind &amp; Sleep</strong>, and a
+      <strong>Myth Buster</strong> mini-game with a running score.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Guidance &amp; tracking</div>
+    <h3>7.8 Career Guidance &amp; Progress</h3>
+    <p class="pathline">/dashboard/student/career · /dashboard/student/progress</p>
+    <p>Career Guidance maps subjects to study paths and careers. Progress projects WASSCE grades from quiz
+      performance against a target, helping students see exactly where to push.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Account</div>
+    <h3>7.9 Profile &amp; Help</h3>
+    <p class="pathline">/dashboard/profile · /dashboard/help</p>
+    <p>Profile shows account details and lets any user <strong>upload a profile picture</strong> (stored under
+      <code>public/uploads/avatars/</code>, validated for type/size); the avatar then appears in the header. Help is a
+      <strong>role-aware FAQ</strong> reachable from the header on every page.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Navigation</div>
+    <h3>7.10 Screen stepper &amp; shell</h3>
+    <p>Every student screen carries a <strong>Back / Next stepper</strong> (top and bottom) that walks through screens
+      in order with a position indicator, plus a shared header with a skip-to-content link, role badge, Help link and avatar.</p>
+  </div>
+
+  <div class="feature">
+    <div class="label">Teacher · Parent · Admin</div>
+    <h3>7.11 Other role dashboards</h3>
+    <p class="pathline">/dashboard/teacher · /dashboard/parent · /dashboard/admin</p>
+    <ul>
+      <li><strong>Teacher:</strong> class roster with performance bars + class average, assignments with due dates,
+        and working <em>Set Assignment</em> &amp; <em>Upload Lesson</em> forms (uploaded materials list below).</li>
+      <li><strong>Parent:</strong> ward subject-performance bars, weekly activity (study time, lessons, streak),
+        focus-area warnings for subjects below 65%, and an Email Report action.</li>
+      <li><strong>Admin:</strong> platform stats (total users, active today, lesson/resource counts), a user breakdown
+        by SHS class level, and a top-subjects-by-sessions table.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 8 DATA MODEL ============ -->
+<section>
+  <p class="eyebrow">Persistence</p>
+  <h1>8. Data Model (Database Schema)</h1>
+  <p>MySQL 8.0, UTF-8. UUID <code>char(36)</code> primary keys, ENUMs for roles/classes, and foreign keys with
+    <code>ON DELETE CASCADE</code>. Key tables:</p>
+  <table>
+    <thead><tr><th style="width:30%">Table</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>users</code></td><td>Credentials — email + bcrypt password hash.</td></tr>
+      <tr><td><code>profiles</code></td><td>Name, role, class, programme, avatar_url (1:1 with users).</td></tr>
+      <tr><td><code>subject_progress</code></td><td>Per-subject % progress per student.</td></tr>
+      <tr><td><code>weekly_stats</code></td><td>Lessons done, study minutes, quiz average, streak.</td></tr>
+      <tr><td><code>homework</code></td><td>Upcoming homework with due dates.</td></tr>
+      <tr><td><code>quiz_attempts</code></td><td>Every quiz attempt — subject, year, score, %, duration.</td></tr>
+      <tr><td><code>chat_messages</code></td><td>AI Study Helper history, keyed by subject + topic.</td></tr>
+      <tr><td><code>achievements</code></td><td>Unlockable badges per student.</td></tr>
+      <tr><td><code>classes</code> / <code>class_students</code></td><td>Teacher classes and their roster + scores.</td></tr>
+      <tr><td><code>assignments</code> / <code>teacher_lessons</code></td><td>Teacher-set assignments and uploaded lesson materials.</td></tr>
+      <tr><td><code>wards</code> / <code>ward_subjects</code></td><td>Parent&rsquo;s linked ward(s) and their subject scores.</td></tr>
+      <tr><td><code>exam_config</code></td><td>WASSCE name &amp; date powering the countdown.</td></tr>
+      <tr><td><code>platform_stats</code> / <code>top_subjects</code></td><td>Admin dashboard aggregates.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 9 QUALITY ============ -->
+<section>
+  <p class="eyebrow">Validation</p>
+  <h1>9. Quality, Usability &amp; Accessibility</h1>
+  <p>The interface was evaluated with two industry usability frameworks, then improved against the findings.</p>
+
+  <h3>9.1 Nielsen&rsquo;s 10 Heuristics</h3>
+  <p>Strong on visibility of system status, match to the real world, consistency, recognition over recall and
+    aesthetic design. Fixes shipped for the weaker areas: friendly <strong>error &amp; 404 boundaries</strong>,
+    quiz <strong>progress persistence + back-navigation</strong>, <strong>confirm-password</strong>, route-level
+    <strong>loading skeletons</strong>, resource <strong>search</strong>, and a <strong>Help/FAQ</strong> page.</p>
+
+  <h3>9.2 Shneiderman&rsquo;s 8 Golden Rules</h3>
+  <p>Post-fix the system scores Strong on consistency, informative feedback, dialog closure, error prevention and
+    reduced memory load; Moderate on universal usability and reversibility — which directed the accessibility work below.</p>
+
+  <h3>9.3 Accessibility pass</h3>
+  <ul>
+    <li>Visible <strong>keyboard focus rings</strong> (<code>:focus-visible</code>) and a <strong>skip-to-content</strong> link.</li>
+    <li><strong>ARIA live regions</strong> for quiz feedback, the timer, save status and AI replies; <code>role="alert"</code> on form errors.</li>
+    <li>Proper <strong>label associations</strong> (htmlFor/id) and autocomplete hints on all auth fields.</li>
+    <li><code>aria-current</code> on active nav, <code>aria-expanded</code>/<code>aria-selected</code> on toggles/tabs, decorative icons hidden from screen readers.</li>
+    <li><strong>Reduced-motion</strong> support via <code>prefers-reduced-motion</code>.</li>
+  </ul>
+</section>
+
+<!-- ============ 10 SECURITY ============ -->
+<section class="nobreak">
+  <p class="eyebrow">Safety</p>
+  <h1>10. Security Considerations</h1>
+  <ul>
+    <li><strong>Passwords</strong> are hashed with bcrypt — never stored in plain text.</li>
+    <li><strong>Sessions</strong> use signed JWTs in httpOnly cookies (not readable by JavaScript).</li>
+    <li><strong>Route protection</strong> via middleware + server-side <code>requireProfile()</code> role checks.</li>
+    <li><strong>AI key</strong> is server-only; <code>/api/chat</code> requires auth and applies rate-limiting.</li>
+    <li><strong>Uploads</strong> are validated for MIME type and size (≤ 4 MB) before being written.</li>
+    <li><em>Dev-only note:</em> <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> is set locally to work behind a corporate SSL proxy and must never ship to production.</li>
+  </ul>
+</section>
+
+<!-- ============ 11 SETUP ============ -->
+<section class="nobreak">
+  <p class="eyebrow">Run it</p>
+  <h1>11. Setup &amp; Running the App</h1>
+  <ol>
+    <li>Install <strong>Node.js</strong> and <strong>MySQL 8.0</strong>.</li>
+    <li>In MySQL Workbench, run <code>phorlearn-app/supabase/schema.sql</code> to create the <code>phorlearn</code> database and tables.</li>
+    <li>Copy <code>.env.local.example</code> to <code>.env.local</code> and set MySQL credentials, <code>AUTH_SECRET</code> and <code>GEMINI_API_KEY</code>.</li>
+    <li>From <code>phorlearn-app/</code>: <code>npm install</code>, then <code>npm run dev</code>.</li>
+    <li>Open <code>http://localhost:3000</code>, sign up, and explore.</li>
+  </ol>
+  <div class="callout gold">
+    <strong>Tip:</strong> per-user demo data (subjects, stats, homework, ward/class records) is generated automatically
+    on signup, so a fresh account immediately shows a populated dashboard.
+  </div>
+</section>
+
+<!-- ============ 12 ROADMAP ============ -->
+<section class="nobreak">
+  <p class="eyebrow">What&rsquo;s next</p>
+  <h1>12. Future Roadmap</h1>
+  <ul>
+    <li><strong>Teacher reversibility:</strong> edit/delete assignments &amp; uploaded lessons.</li>
+    <li><strong>Quiz controls:</strong> a &ldquo;1 minute left&rdquo; warning before auto-submit and an optional untimed practice mode.</li>
+    <li><strong>Universal usability:</strong> localisation for additional Ghanaian languages and a text-size control.</li>
+    <li><strong>Self-service password reset</strong> and email verification.</li>
+    <li><strong>Embedded video lessons</strong> (verified inline players) alongside the search links.</li>
+    <li><strong>Real assessment analytics</strong> for teachers (per-topic weakness heatmaps).</li>
+  </ul>
+
+  <footer class="note">
+    PhorLearn SHS — Project Documentation &amp; Technical Dossier · Prepared for Hackathon &rsquo;26.<br>
+    Built with Next.js 15, React 19, TypeScript, MySQL 8 and Google Gemini.
+  </footer>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhorLearn SHS – Interactive Prototype</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:      #0D0F1A;
+    --ink2:     #2D3150;
+    --muted:    #6B7280;
+    --faint:    #F4F5F9;
+    --border:   #E4E6EF;
+    --card:     #FFFFFF;
+
+    --blue:     #1B4FD8;
+    --blue-mid: #3B6EF5;
+    --blue-lt:  #EEF2FF;
+    --gold:     #D4A017;
+    --gold-lt:  #FFF8E1;
+    --green:    #16A34A;
+    --green-lt: #F0FDF4;
+    --red:      #DC2626;
+    --red-lt:   #FEF2F2;
+
+    --radius:   14px;
+    --shadow:   0 2px 16px rgba(13,15,26,0.08);
+    --shadow-lg:0 8px 40px rgba(13,15,26,0.14);
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--faint);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--ink);
+    color: white;
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .logo {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .logo-badge {
+    background: var(--blue-mid);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+    letter-spacing: .5px;
+  }
+  .topbar-bread {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+  }
+  .topbar-bread span { cursor: pointer; transition: color .2s; }
+  .topbar-bread span:hover { color: white; }
+  .topbar-bread span.active { color: white; font-weight: 600; }
+  .topbar-bread .sep { opacity: .35; }
+
+  /* ── STEPPER ── */
+  .stepper-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px 10px;
+    overflow-x: auto;
+  }
+  .stepper {
+    display: flex;
+    align-items: flex-start;
+    max-width: 1060px;
+    margin: 0 auto;
+    min-width: max-content;
+  }
+  .st {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 80px;
+    position: relative;
+  }
+  .st + .st::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: calc(-50% + 10px);
+    right: calc(50% + 10px);
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+    transition: background .3s;
+  }
+  .st.done + .st::before { background: var(--blue); }
+  .st-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+    transition: all .25s;
+    border: 2px solid transparent;
+  }
+  .st.active .st-dot { background: var(--blue); color: white; border-color: #93B4FF; box-shadow: 0 0 0 3px rgba(27,79,216,0.15); }
+  .st.done .st-dot   { background: var(--blue); color: white; }
+  .st-lbl { font-size: 10px; color: var(--muted); font-weight: 500; text-align: center; white-space: nowrap; }
+  .st.active .st-lbl { color: var(--blue); font-weight: 700; }
+  .st.done .st-lbl   { color: var(--blue); }
+
+  /* ── LAYOUT ── */
+  .page { max-width: 1060px; margin: 0 auto; padding: 32px 20px 80px; }
+  .panel { display: none; animation: up .3s ease; }
+  .panel.active { display: block; }
+  @keyframes up { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--blue); margin-bottom: 5px; }
+  .h1 { font-size: 30px; font-weight: 800; color: var(--ink); letter-spacing: -0.5px; margin-bottom: 4px; line-height: 1.2; }
+  .sub { font-size: 14px; color: var(--muted); margin-bottom: 26px; line-height: 1.6; }
+
+  /* ── GRID ── */
+  .g2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+  .g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  @media(max-width:680px) { .g2,.g3,.g4 { grid-template-columns:1fr; } }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent;
+    transition: all .2s;
+  }
+  .card.click { cursor: pointer; }
+  .card.click:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .card.sel { border-color: var(--blue); background: var(--blue-lt); }
+  .card-icon { font-size: 30px; margin-bottom: 10px; }
+  .card-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .card-body { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .card-cta { margin-top: 14px; font-size: 12px; font-weight: 700; color: var(--blue); }
+
+  /* ── TAG / PILL ── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; letter-spacing: .3px;
+  }
+  .pill-blue   { background: var(--blue-lt);  color: var(--blue); }
+  .pill-gold   { background: var(--gold-lt);  color: var(--gold); }
+  .pill-green  { background: var(--green-lt); color: var(--green); }
+  .pill-red    { background: var(--red-lt);   color: var(--red); }
+  .pill-ink    { background: #ECEDF3; color: var(--ink2); }
+
+  /* ── BUTTON ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 11px 22px; border-radius: 10px;
+    border: none; cursor: pointer;
+    font-size: 13px; font-weight: 700;
+    font-family: inherit;
+    transition: all .18s;
+  }
+  .btn-primary { background: var(--blue); color: white; }
+  .btn-primary:hover { background: #1340B8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(27,79,216,0.3); }
+  .btn-outline { background: white; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-outline:hover { background: var(--blue-lt); }
+  .btn-ghost   { background: white; color: var(--muted); border: 2px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+  .btn-gold    { background: var(--gold); color: white; }
+  .btn-gold:hover { background: #B8860B; }
+  .nav-row { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+
+  /* ── WIDGET ── */
+  .widget { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .wlabel { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .dash-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media(max-width:680px) { .dash-layout { grid-template-columns:1fr; } }
+
+  /* ── PROGRESS BAR ── */
+  .prow { margin-bottom: 13px; }
+  .prow-top { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+  .pbar { height: 7px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .pfill { height: 100%; border-radius: 99px; background: var(--blue); transition: width .6s ease; }
+
+  /* ── STAT BOX ── */
+  .stats-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .stat { flex:1; min-width:70px; background: var(--faint); border-radius: 10px; padding: 14px 10px; text-align: center; }
+  .stat-n { font-size: 22px; font-weight: 800; color: var(--blue); }
+  .stat-l { font-size: 10px; color: var(--muted); margin-top: 2px; font-weight: 600; letter-spacing:.3px; }
+
+  /* ── FORM ── */
+  .fgroup { margin-bottom: 18px; }
+  .flabel { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--ink2); letter-spacing:.3px; }
+  .finput {
+    width: 100%; padding: 11px 14px;
+    border: 2px solid var(--border); border-radius: 10px;
+    font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color .2s;
+    background: white;
+  }
+  .finput:focus { border-color: var(--blue); }
+  .fselect {
+    width: 100%; padding: 11px 14px;
+    border: 2px solid var(--border); border-radius: 10px;
+    font-size: 14px; font-family: inherit;
+    background: white; outline: none;
+  }
+
+  /* ── TAB SWITCHER ── */
+  .tabs { display: flex; border: 2px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 22px; }
+  .tab-btn {
+    flex:1; padding: 10px; background: white; border: none;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: inherit; color: var(--muted); transition: all .2s;
+  }
+  .tab-btn.on { background: var(--blue); color: white; }
+
+  /* ── SPLASH ── */
+  .splash-hero {
+    background: var(--ink);
+    border-radius: 20px;
+    padding: 60px 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .splash-hero::before {
+    content:'';
+    position: absolute; top:-80px; right:-80px;
+    width:300px; height:300px; border-radius:50%;
+    background: rgba(59,110,245,0.15);
+  }
+  .splash-hero::after {
+    content:'';
+    position: absolute; bottom:-60px; left:30%;
+    width:200px; height:200px; border-radius:50%;
+    background: rgba(212,160,23,0.10);
+  }
+  .splash-kicker { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #93B4FF; margin-bottom: 14px; }
+  .splash-h { font-size: 46px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; margin-bottom: 12px; }
+  .splash-h em { color: #93B4FF; font-style: normal; }
+  .splash-p { font-size: 16px; color: rgba(255,255,255,0.72); max-width: 480px; line-height: 1.65; margin-bottom: 30px; }
+  .splash-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ── SUBJECT CHIPS ── */
+  .subject-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+  .subj {
+    padding: 10px 18px; border-radius: 10px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    border: 2px solid transparent;
+  }
+  .subj:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .s-math  { background:#EEF2FF; color:#1B4FD8; }
+  .s-eng   { background:#FFF8E1; color:#B45309; }
+  .s-sci   { background:#F0FDF4; color:#16A34A; }
+  .s-ict   { background:#F0F9FF; color:#0369A1; }
+  .s-econ  { background:#FDF4FF; color:#7C3AED; }
+  .s-hist  { background:#FFF7ED; color:#C2410C; }
+  .s-geo   { background:#ECFDF5; color:#065F46; }
+  .s-elec  { background:#FFF1F2; color:#BE123C; }
+
+  /* ── LESSON ── */
+  .lesson-hero {
+    background: linear-gradient(135deg, var(--ink) 0%, #1B4FD8 100%);
+    border-radius: var(--radius);
+    padding: 30px;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .lesson-meta { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: .6; margin-bottom: 8px; }
+  .lesson-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .lesson-sub { font-size: 14px; opacity: .8; }
+
+  /* ── QUIZ ── */
+  .q-opt {
+    display: flex; align-items: center; gap: 12px;
+    background: white; border: 2px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    cursor: pointer; font-size: 14px; margin-bottom: 10px;
+    transition: all .2s;
+  }
+  .q-opt:hover { border-color: var(--blue); background: var(--blue-lt); }
+  .q-opt.correct { border-color: var(--green); background: var(--green-lt); color: var(--green); }
+  .q-opt.wrong   { border-color: var(--red);   background: var(--red-lt);   color: var(--red); }
+  .q-letter {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--faint); display: flex; align-items: center;
+    justify-content: center; font-size: 12px; font-weight: 700; flex-shrink:0;
+  }
+  .timer-strip { height: 5px; background: var(--border); border-radius:99px; margin-bottom:18px; overflow:hidden; }
+  .timer-fill  { height:100%; border-radius:99px; background: var(--gold); width:70%; animation: tick 40s linear forwards; }
+  @keyframes tick { to { width:0%; } }
+
+  /* ── ACHIEVEMENT ── */
+  .ach-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  @media(max-width:600px) { .ach-grid { grid-template-columns: repeat(2,1fr); } }
+  .ach {
+    background: white; border-radius: 12px;
+    padding: 18px 12px; text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .ach-ico  { font-size: 28px; margin-bottom: 6px; }
+  .ach-name { font-size: 12px; font-weight: 700; }
+  .ach-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .ach.locked { opacity: .38; }
+
+  /* ── PAST QUESTIONS ── */
+  .pq-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; background: white; border-radius: 10px;
+    margin-bottom: 10px; border: 2px solid var(--border);
+    cursor: pointer; transition: border-color .2s;
+  }
+  .pq-row:hover { border-color: var(--blue); }
+  .pq-yr { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .pq-meta { font-size: 12px; color: var(--muted); }
+
+  /* ── CHAT ── */
+  .chat-bubble-ai {
+    background: var(--blue-lt); border-radius: 12px 12px 12px 2px;
+    padding: 12px 14px; font-size: 13px; line-height: 1.6;
+    color: var(--ink2); max-width: 85%; margin-bottom: 10px;
+  }
+  .chat-bubble-user {
+    background: var(--blue); border-radius: 12px 12px 2px 12px;
+    padding: 12px 14px; font-size: 13px; line-height: 1.6;
+    color: white; max-width: 85%; margin-bottom: 10px; margin-left: auto;
+  }
+  .chat-input-row { display: flex; gap: 8px; margin-top: 10px; }
+  .chat-input-row input {
+    flex:1; padding: 10px 14px; border: 2px solid var(--border);
+    border-radius: 10px; font-size: 13px; font-family: inherit; outline:none;
+  }
+  .chat-input-row input:focus { border-color: var(--blue); }
+
+  /* ── TEACHER DASHBOARD ── */
+  .class-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; background: var(--faint);
+    border-radius: 10px; margin-bottom: 8px;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--blue-lt); color: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink:0;
+  }
+
+  /* ── ADMIN ── */
+  .admin-stat {
+    background: white; border-radius: 12px; padding: 20px 18px;
+    box-shadow: var(--shadow); border-left: 4px solid var(--blue);
+  }
+  .admin-stat-n { font-size: 28px; font-weight: 900; color: var(--ink); }
+  .admin-stat-l { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+  /* ── CAREER ── */
+  .career-card {
+    background: white; border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow); cursor: pointer;
+    border: 2px solid transparent; transition: all .2s;
+  }
+  .career-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+  .career-icon { font-size: 32px; margin-bottom: 8px; }
+  .career-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .career-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── FLOW OVERVIEW ── */
+  .flow-box {
+    background: var(--ink); border-radius: var(--radius);
+    padding: 22px 24px; overflow-x: auto;
+    margin-bottom: 20px;
+  }
+  .flow-row-nodes { display: flex; align-items: center; gap: 8px; min-width: max-content; }
+  .fn {
+    background: rgba(255,255,255,0.08); color: white;
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 11px; font-weight: 700; text-align: center;
+    cursor: pointer; transition: background .2s; white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.12);
+    min-width: 80px;
+  }
+  .fn:hover { background: var(--blue); border-color: var(--blue); }
+  .fn.alt { background: rgba(212,160,23,0.2); border-color: rgba(212,160,23,0.4); }
+  .fn.alt:hover { background: var(--gold); border-color: var(--gold); }
+  .fa { color: rgba(255,255,255,0.3); font-size: 18px; flex-shrink:0; }
+  .flow-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: rgba(255,255,255,0.45); text-transform: uppercase; margin-bottom: 14px; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:99px; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    ⭐ PhorLearn
+    <span class="logo-badge">SHS</span>
+  </div>
+  <div class="topbar-bread" id="bread"></div>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper-bar">
+  <div class="stepper" id="stepper"></div>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════ 1. SPLASH ══════════════ -->
+  <div class="panel active" id="p0">
+    <div class="splash-hero">
+      <div class="splash-kicker">PhorLearn · Senior High School</div>
+      <div class="splash-h">Your <em>WASSCE</em><br>Starts Here.</div>
+      <div class="splash-p">Ghana's most focused SHS study platform. Past questions, AI tutoring, live assessments and career guidance — all in one place.</div>
+      <div class="splash-btns">
+        <button class="btn btn-primary" style="font-size:14px;padding:13px 28px;" onclick="go(1)">Get Started →</button>
+        <button class="btn" style="background:rgba(255,255,255,0.1);color:white;border:2px solid rgba(255,255,255,0.25);font-size:14px;padding:13px 28px;" onclick="go(3)">Log In</button>
+      </div>
+    </div>
+
+    <div class="flow-box">
+      <div class="flow-title">Full App Flow — click any node to jump</div>
+      <div class="flow-row-nodes">
+        <div class="fn" onclick="go(0)">① Splash</div>
+        <div class="fa">→</div>
+        <div class="fn" onclick="go(1)">② Role</div>
+        <div class="fa">→</div>
+        <div class="fn" onclick="go(2)">③ Sign Up</div>
+        <div class="fa">→</div>
+        <div class="fn" onclick="go(3)">④ Dashboard</div>
+        <div class="fa">→</div>
+        <div class="fn" onclick="go(4)">⑤ Subjects</div>
+        <div class="fa">→</div>
+        <div class="fn alt" onclick="go(5)">⑥ Lessons</div>
+        <div class="fa">→</div>
+        <div class="fn alt" onclick="go(6)">⑦ Past Qs</div>
+        <div class="fa">→</div>
+        <div class="fn alt" onclick="go(7)">⑧ Quiz</div>
+        <div class="fa">→</div>
+        <div class="fn" onclick="go(8)">⑨ Career</div>
+        <div class="fa">→</div>
+        <div class="fn" onclick="go(9)">⑩ Progress</div>
+      </div>
+    </div>
+
+    <div class="g3" style="margin-bottom:20px;">
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">WASSCE Past Questions</div>
+        <div class="card-body">2020 – 2023 papers across all subjects. Practice, time yourself, review answers.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <div class="card-title">AI Study Helper</div>
+        <div class="card-body">Ask anything. Get instant explanations, worked examples and study tips.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎓</div>
+        <div class="card-title">Career Guidance</div>
+        <div class="card-body">Explore universities, programmes and career paths aligned to your subjects.</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-primary" onclick="go(1)">Choose Your Role →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 2. ROLE SELECTION ══════════════ -->
+  <div class="panel" id="p1">
+    <div class="eyebrow">Step 1</div>
+    <div class="h1">Who are you?</div>
+    <div class="sub">Select your role to access the right experience.</div>
+    <div class="g2">
+      <div class="card click" onclick="pickRole('learner',this)">
+        <div class="card-icon">🎒</div>
+        <div class="card-title">SHS Student</div>
+        <div class="card-body">Access lessons, past questions, live quizzes, AI tutoring, and your personal progress dashboard.</div>
+        <div class="card-cta">Select →</div>
+      </div>
+      <div class="card click" onclick="pickRole('parent',this)">
+        <div class="card-icon">👨‍👩‍👦</div>
+        <div class="card-title">Parent / Guardian</div>
+        <div class="card-body">Monitor your ward's performance, time spent studying, and receive weekly progress reports.</div>
+        <div class="card-cta">Select →</div>
+      </div>
+      <div class="card click" onclick="pickRole('teacher',this)">
+        <div class="card-icon">🖊️</div>
+        <div class="card-title">Teacher</div>
+        <div class="card-body">Upload notes, set assignments, track class performance and view per-student analytics.</div>
+        <div class="card-cta">Select →</div>
+      </div>
+      <div class="card click" onclick="pickRole('admin',this)">
+        <div class="card-icon">🛡️</div>
+        <div class="card-title">Admin</div>
+        <div class="card-body">Manage users, content, platform statistics and school-level data.</div>
+        <div class="card-cta">Select →</div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(0)">← Back</button>
+      <button class="btn btn-primary" onclick="go(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 3. SIGN UP / LOGIN ══════════════ -->
+  <div class="panel" id="p2">
+    <div class="eyebrow">Step 2</div>
+    <div class="h1">Create your account</div>
+    <div class="sub">Sign up free or log in to continue.</div>
+    <div style="max-width:440px;">
+      <div class="tabs">
+        <button class="tab-btn on" id="t-up" onclick="swTab('up')">Sign Up</button>
+        <button class="tab-btn" id="t-in" onclick="swTab('in')">Log In</button>
+      </div>
+      <div id="f-up">
+        <div class="fgroup"><label class="flabel">Full Name</label><input class="finput" placeholder="e.g. Sandra Owusu" /></div>
+        <div class="fgroup"><label class="flabel">Email</label><input class="finput" type="email" placeholder="you@email.com" /></div>
+        <div class="fgroup"><label class="flabel">Password</label><input class="finput" type="password" placeholder="Create a strong password" /></div>
+        <div class="fgroup">
+          <label class="flabel">Your Class</label>
+          <select class="fselect"><option>SHS 1</option><option>SHS 2</option><option selected>SHS 3</option></select>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Programme</label>
+          <select class="fselect">
+            <option>General Science</option>
+            <option>General Arts</option>
+            <option>Business</option>
+            <option>Visual Arts</option>
+            <option>Home Economics</option>
+            <option>Technical</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:13px;" onclick="go(3)">Create Account →</button>
+      </div>
+      <div id="f-in" style="display:none;">
+        <div class="fgroup"><label class="flabel">Email</label><input class="finput" type="email" placeholder="you@email.com" /></div>
+        <div class="fgroup"><label class="flabel">Password</label><input class="finput" type="password" placeholder="Your password" /></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;font-size:14px;padding:13px;" onclick="go(3)">Log In →</button>
+        <p style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center;">Forgot password? <span style="color:var(--blue);cursor:pointer;font-weight:700;">Reset it</span></p>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(1)">← Back</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 4. LEARNER DASHBOARD ══════════════ -->
+  <div class="panel" id="p3">
+    <div class="eyebrow">Dashboard · SHS 3 · General Science</div>
+    <div class="h1">Welcome back, Sandra 👋</div>
+    <div class="sub">WASSCE is in <strong style="color:var(--blue);">87 days</strong>. You're on a 5-day streak. Keep going.</div>
+
+    <div class="dash-layout">
+      <div>
+        <div class="widget" style="margin-bottom:16px;">
+          <div class="wlabel">Continue Studying</div>
+          <div class="prow"><div class="prow-top"><span>📐 Elective Maths</span><span style="color:var(--blue);">68%</span></div><div class="pbar"><div class="pfill" style="width:68%;"></div></div></div>
+          <div class="prow"><div class="prow-top"><span>⚗️ Chemistry</span><span>45%</span></div><div class="pbar"><div class="pfill" style="width:45%;background:var(--gold);"></div></div></div>
+          <div class="prow"><div class="prow-top"><span>🔬 Biology</span><span style="color:var(--green);">82%</span></div><div class="pbar"><div class="pfill" style="width:82%;background:var(--green);"></div></div></div>
+          <div class="prow"><div class="prow-top"><span>⚡ Physics</span><span>55%</span></div><div class="pbar"><div class="pfill" style="width:55%;background:#7C3AED;"></div></div></div>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="go(4)">Go to Subjects →</button>
+        </div>
+        <div class="widget">
+          <div class="wlabel">Upcoming</div>
+          <div style="font-size:13px;line-height:2;color:var(--ink2);">
+            📋 <strong>Chemistry Assignment</strong> — Due in 2 days<br>
+            📝 <strong>Elective Maths Practice Test</strong> — Tomorrow 10am<br>
+            🧪 <strong>Biology Past Questions (2022)</strong> — Scheduled Friday
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="widget" style="margin-bottom:16px;">
+          <div class="wlabel">This Week</div>
+          <div class="stats-row" style="flex-direction:column;">
+            <div class="stat" style="text-align:left;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">📚</span>
+              <div><div class="stat-n">18</div><div class="stat-l">Lessons done</div></div>
+            </div>
+            <div class="stat" style="text-align:left;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">⏱</span>
+              <div><div class="stat-n">6h 20m</div><div class="stat-l">Study time</div></div>
+            </div>
+            <div class="stat" style="text-align:left;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">🏆</span>
+              <div><div class="stat-n">76%</div><div class="stat-l">Avg quiz score</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="wlabel">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-outline" style="justify-content:center;" onclick="go(6)">📋 Past Questions</button>
+            <button class="btn btn-outline" style="justify-content:center;" onclick="go(7)">✍️ Take a Quiz</button>
+            <button class="btn" style="justify-content:center;background:var(--gold-lt);color:var(--gold);font-weight:700;border:none;" onclick="go(8)">🎓 Career Guidance</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role switcher for demo -->
+    <div class="widget" style="margin-bottom:16px;">
+      <div class="wlabel">Demo — Switch Dashboard View</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="go(10)">👨‍👩‍👦 Parent View</button>
+        <button class="btn btn-ghost" onclick="go(11)">🖊️ Teacher View</button>
+        <button class="btn btn-ghost" onclick="go(12)">🛡️ Admin View</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(2)">← Back</button>
+      <button class="btn btn-primary" onclick="go(4)">Browse Subjects →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 5. SUBJECT HUB ══════════════ -->
+  <div class="panel" id="p4">
+    <div class="eyebrow">Subject Hub</div>
+    <div class="h1">Your Subjects</div>
+    <div class="sub">General Science programme · SHS 3. Click a subject to start studying.</div>
+
+    <div class="widget" style="margin-bottom:16px;">
+      <div class="wlabel">Core Subjects</div>
+      <div class="subject-grid">
+        <div class="subj s-eng" onclick="go(5)">📖 English Language</div>
+        <div class="subj s-math" onclick="go(5)">📐 Core Maths</div>
+        <div class="subj s-sci" onclick="go(5)">🔬 Integrated Science</div>
+        <div class="subj s-ict" onclick="go(5)">💻 ICT</div>
+        <div class="subj s-hist" onclick="go(5)">🌍 Social Studies</div>
+      </div>
+    </div>
+
+    <div class="widget" style="margin-bottom:16px;">
+      <div class="wlabel">Elective Subjects</div>
+      <div class="subject-grid">
+        <div class="subj s-math" onclick="go(5)">📐 Elective Maths</div>
+        <div class="subj s-sci" onclick="go(5)">⚗️ Chemistry</div>
+        <div class="subj s-sci" onclick="go(5)">🔬 Biology</div>
+        <div class="subj s-elec" onclick="go(5)">⚡ Physics</div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div class="card click" onclick="go(5)">
+        <div class="card-icon">📘</div>
+        <div class="card-title">Notes & Lessons</div>
+        <div class="card-body">Curriculum-aligned notes, videos and worked examples per topic.</div>
+        <div class="card-cta">Open →</div>
+      </div>
+      <div class="card click" onclick="go(6)">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Past Questions</div>
+        <div class="card-body">WASSCE 2020–2023 papers with model answers.</div>
+        <div class="card-cta">Open →</div>
+      </div>
+      <div class="card click" onclick="go(7)">
+        <div class="card-icon">✍️</div>
+        <div class="card-title">Practice Quiz</div>
+        <div class="card-body">Timed quizzes that mirror the real WASSCE format.</div>
+        <div class="card-cta">Start →</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(3)">← Dashboard</button>
+      <button class="btn btn-primary" onclick="go(5)">Open a Lesson →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 6. LESSON ══════════════ -->
+  <div class="panel" id="p5">
+    <div class="eyebrow">Elective Mathematics · Topic 4</div>
+    <div class="lesson-hero">
+      <div class="lesson-meta">📐 Elective Maths · SHS 3 · WASSCE Syllabus</div>
+      <div class="lesson-title">Integration — The Definite Integral</div>
+      <div class="lesson-sub">Understand area under a curve, limits of integration, and real-world applications.</div>
+    </div>
+
+    <div class="dash-layout">
+      <div>
+        <div class="widget" style="margin-bottom:16px;">
+          <div class="wlabel">Lesson Content</div>
+          <div style="font-size:14px;line-height:1.9;color:var(--ink2);">
+            <p><strong>Definition</strong><br>The definite integral ∫ₐᵇ f(x) dx gives the net area between the curve f(x) and the x-axis, from x = a to x = b.</p>
+            <br>
+            <p><strong>Key Rule (Power Rule)</strong><br>∫ xⁿ dx = xⁿ⁺¹ / (n+1) + C, where n ≠ −1</p>
+            <br>
+            <p><strong>Worked Example</strong><br>Find ∫₁³ (2x + 1) dx<br>
+            = [x² + x]₁³ = (9+3) − (1+1) = 12 − 2 = <strong style="color:var(--blue);">10</strong></p>
+            <br>
+            <p style="font-size:12px;color:var(--muted);">GES Syllabus · WASSCE Approved · Topic 4.2</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+            <button class="btn btn-outline">📹 Watch Video</button>
+            <button class="btn btn-ghost">📄 Download Notes</button>
+            <button class="btn btn-primary" onclick="go(7)">Take Quiz →</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="widget" style="margin-bottom:16px;">
+          <div class="wlabel">🤖 AI Study Helper <span class="pill pill-green" style="font-size:9px;vertical-align:middle;">FREE · Gemini</span></div>
+
+          <!-- API Key setup notice -->
+          <div id="apikey-setup" style="background:var(--blue-lt);border-radius:10px;padding:12px;margin-bottom:10px;font-size:12px;color:var(--ink2);line-height:1.7;">
+            <strong>Demo Setup:</strong> Enter a free Gemini API key to activate live AI.<br>
+            Get one free at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--blue);font-weight:700;">aistudio.google.com</a> (no billing needed).
+            <div style="display:flex;gap:6px;margin-top:8px;">
+              <input id="gemini-key-input" class="finput" placeholder="Paste Gemini API key here…" style="font-size:12px;padding:8px 10px;" />
+              <button class="btn btn-primary" style="padding:8px 12px;font-size:12px;white-space:nowrap;" onclick="saveKey()">Activate</button>
+            </div>
+          </div>
+
+          <div id="chat-messages" style="max-height:240px;overflow-y:auto;margin-bottom:8px;display:flex;flex-direction:column;gap:6px;">
+            <div class="chat-bubble-ai">Hello Sandra! I'm your WASSCE Study Helper. Ask me anything about <strong>Definite Integrals</strong> or Elective Maths.</div>
+          </div>
+
+          <div id="chat-thinking" style="display:none;padding:8px;font-size:12px;color:var(--muted);font-style:italic;">⏳ Thinking…</div>
+
+          <div class="chat-input-row">
+            <input id="chat-input" placeholder="Ask anything about this topic…" onkeydown="if(event.key==='Enter')sendChat()" />
+            <button class="btn btn-primary" style="padding:9px 14px;" onclick="sendChat()">→</button>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:right;">Powered by Google Gemini Flash · Free</div>
+        </div>
+        <div class="widget">
+          <div class="wlabel">More in this topic</div>
+          <div style="font-size:13px;line-height:2.2;color:var(--ink2);">
+            4.1 Indefinite Integrals <span class="pill pill-green" style="font-size:10px;">Done</span><br>
+            <strong>4.2 Definite Integrals</strong> <span class="pill pill-blue" style="font-size:10px;">Now</span><br>
+            4.3 Area under a Curve<br>
+            4.4 Applications
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(4)">← Subjects</button>
+      <button class="btn btn-outline" onclick="go(6)">Past Questions →</button>
+      <button class="btn btn-primary" onclick="go(7)">Practice Quiz →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 7. PAST QUESTIONS ══════════════ -->
+  <div class="panel" id="p6">
+    <div class="eyebrow">WASSCE Past Questions</div>
+    <div class="h1">Elective Mathematics</div>
+    <div class="sub">Practice with real WASSCE papers. Select a year to begin.</div>
+
+    <div class="widget" style="margin-bottom:20px;">
+      <div class="wlabel">Select Subject</div>
+      <div class="subject-grid">
+        <div class="subj s-math" style="border:2px solid var(--blue);">📐 Elective Maths</div>
+        <div class="subj s-sci" onclick="">⚗️ Chemistry</div>
+        <div class="subj s-sci" onclick="">🔬 Biology</div>
+        <div class="subj s-elec" onclick="">⚡ Physics</div>
+        <div class="subj s-eng" onclick="">📖 English</div>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="wlabel">Available Papers</div>
+      <div class="pq-row" onclick="go(7)">
+        <div><div class="pq-yr">WASSCE 2023</div><div class="pq-meta">80 Questions · Paper 1 & 2</div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-green">New</span><span style="color:var(--blue);font-weight:700;">Start →</span></div>
+      </div>
+      <div class="pq-row" onclick="go(7)">
+        <div><div class="pq-yr">WASSCE 2022</div><div class="pq-meta">80 Questions · Paper 1 & 2</div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-blue">76% last attempt</span><span style="color:var(--blue);font-weight:700;">Retry →</span></div>
+      </div>
+      <div class="pq-row" onclick="go(7)">
+        <div><div class="pq-yr">WASSCE 2021</div><div class="pq-meta">80 Questions · Paper 1 & 2</div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-green">88% last attempt</span><span style="color:var(--blue);font-weight:700;">Review →</span></div>
+      </div>
+      <div class="pq-row" onclick="go(7)">
+        <div><div class="pq-yr">WASSCE 2020</div><div class="pq-meta">80 Questions · Paper 1 & 2</div></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-ink">Not started</span><span style="color:var(--blue);font-weight:700;">Start →</span></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(4)">← Subjects</button>
+      <button class="btn btn-primary" onclick="go(7)">Start 2023 Paper →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 8. QUIZ / ASSESSMENT ══════════════ -->
+  <div class="panel" id="p7">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+      <div class="eyebrow" style="margin:0;">WASSCE 2023 · Elective Maths</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="pill pill-ink">Q 5 of 40</span>
+        <span class="pill pill-gold">⏱ 28:14</span>
+      </div>
+    </div>
+    <div class="timer-strip"><div class="timer-fill"></div></div>
+
+    <div class="widget" style="margin-bottom:16px;">
+      <div class="wlabel">Question 5</div>
+      <div style="font-size:16px;font-weight:600;line-height:1.7;margin-bottom:20px;color:var(--ink);">
+        Evaluate ∫₀² (3x² + 2x) dx
+      </div>
+      <div onclick="pick(this,'w')" class="q-opt"><div class="q-letter">A</div> 8</div>
+      <div onclick="pick(this,'w')" class="q-opt"><div class="q-letter">B</div> 6</div>
+      <div onclick="pick(this,'c')" class="q-opt"><div class="q-letter">C</div> 12</div>
+      <div onclick="pick(this,'w')" class="q-opt"><div class="q-letter">D</div> 10</div>
+    </div>
+
+    <div id="q-feedback" style="display:none;" class="widget" style="">
+      <div style="display:flex;align-items:flex-start;gap:12px;">
+        <span style="font-size:24px;">✅</span>
+        <div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">Correct! The answer is 12.</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7;">∫₀² (3x²+2x)dx = [x³+x²]₀² = (8+4)−(0+0) = <strong>12</strong>. Apply the power rule to each term, then evaluate at the upper and lower limits. Full solution available in review.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(6)">← Back to Papers</button>
+      <button class="btn btn-outline">Skip</button>
+      <button class="btn btn-primary" onclick="go(9)">Submit & See Results →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 9. CAREER GUIDANCE ══════════════ -->
+  <div class="panel" id="p8">
+    <div class="eyebrow">Career Guidance</div>
+    <div class="h1">Explore Your Future</div>
+    <div class="sub">Based on your General Science programme. Discover programmes, universities and career paths.</div>
+
+    <div class="g3" style="margin-bottom:20px;">
+      <div class="career-card">
+        <div class="career-icon">⚕️</div>
+        <div class="career-title">Medicine & Surgery</div>
+        <div class="career-desc">University of Ghana, KNUST, UDS · Requires Biology, Chemistry, Physics · WASSCE A1–C6</div>
+      </div>
+      <div class="career-card">
+        <div class="career-icon">⚙️</div>
+        <div class="career-title">Engineering</div>
+        <div class="career-desc">KNUST, UMaT, UG · Requires Maths, Physics · Various specialisations available</div>
+      </div>
+      <div class="career-card">
+        <div class="career-icon">💊</div>
+        <div class="career-title">Pharmacy</div>
+        <div class="career-desc">KNUST, UG · Requires Chemistry, Biology · Strong science grades essential</div>
+      </div>
+      <div class="career-card">
+        <div class="career-icon">🧬</div>
+        <div class="career-title">Biochemistry</div>
+        <div class="career-desc">Multiple universities · Research-focused, lab-intensive programme</div>
+      </div>
+      <div class="career-card">
+        <div class="career-icon">🌿</div>
+        <div class="career-title">Agriculture</div>
+        <div class="career-desc">UG, UDS, UENR · Strong future in Ghana's agri-economy</div>
+      </div>
+      <div class="career-card">
+        <div class="career-icon">💻</div>
+        <div class="career-title">Computer Science</div>
+        <div class="career-desc">KNUST, UG, Ashesi · Maths & ICT key · High employment rate</div>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="wlabel">Resource Library</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-outline">📁 University Brochures</button>
+        <button class="btn btn-outline">📋 Cut-off Points 2023</button>
+        <button class="btn btn-outline">🎥 Career Videos</button>
+        <button class="btn btn-outline">📝 Scholarship Info</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(3)">← Dashboard</button>
+      <button class="btn btn-primary" onclick="go(9)">View My Progress →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 10. PROGRESS ══════════════ -->
+  <div class="panel" id="p9">
+    <div class="eyebrow">Progress & Performance</div>
+    <div class="h1">Sandra's Report 📊</div>
+    <div class="sub">Overall standing · WASSCE in 87 days · Keep your momentum.</div>
+
+    <div class="dash-layout" style="margin-bottom:16px;">
+      <div class="widget">
+        <div class="wlabel">Subject Performance</div>
+        <div class="prow"><div class="prow-top"><span>📖 English</span><span style="color:var(--green);font-weight:700;">A1 · 88%</span></div><div class="pbar"><div class="pfill" style="width:88%;background:var(--green);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>📐 Core Maths</span><span style="font-weight:700;">B2 · 78%</span></div><div class="pbar"><div class="pfill" style="width:78%;"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>📐 Elective Maths</span><span style="font-weight:700;">B3 · 72%</span></div><div class="pbar"><div class="pfill" style="width:72%;background:#7C3AED;"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>⚗️ Chemistry</span><span style="color:var(--gold);font-weight:700;">C4 · 62%</span></div><div class="pbar"><div class="pfill" style="width:62%;background:var(--gold);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>🔬 Biology</span><span style="color:var(--green);font-weight:700;">A2 · 85%</span></div><div class="pbar"><div class="pfill" style="width:85%;background:var(--green);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>⚡ Physics</span><span style="font-weight:700;">B3 · 70%</span></div><div class="pbar"><div class="pfill" style="width:70%;background:#7C3AED;"></div></div></div>
+      </div>
+      <div>
+        <div class="widget" style="margin-bottom:14px;">
+          <div class="wlabel">Overall Stats</div>
+          <div class="stats-row" style="flex-direction:column;">
+            <div class="stat"><div class="stat-n">76%</div><div class="stat-l">Avg Score</div></div>
+            <div class="stat"><div class="stat-n">42h</div><div class="stat-l">Study Time</div></div>
+            <div class="stat"><div class="stat-n">5🔥</div><div class="stat-l">Day Streak</div></div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="wlabel">⚠️ Focus Areas</div>
+          <div style="font-size:13px;line-height:2;color:var(--ink2);">
+            Chemistry needs <strong style="color:var(--red);">+8%</strong> for B3<br>
+            Elective Maths: integration<br>
+            Physics: waves & optics
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="widget" style="margin-bottom:20px;">
+      <div class="wlabel">Achievements</div>
+      <div class="ach-grid">
+        <div class="ach"><div class="ach-ico">🏅</div><div class="ach-name">Consistent Learner</div><div class="ach-desc">5-day streak</div></div>
+        <div class="ach"><div class="ach-ico">⭐</div><div class="ach-name">Biology Star</div><div class="ach-desc">85%+ in Biology</div></div>
+        <div class="ach"><div class="ach-ico">📋</div><div class="ach-name">Past Q Champion</div><div class="ach-desc">All 2022 papers done</div></div>
+        <div class="ach locked"><div class="ach-ico">🥇</div><div class="ach-name">Top 10%</div><div class="ach-desc">Avg 90%+ needed</div></div>
+        <div class="ach locked"><div class="ach-ico">🎓</div><div class="ach-name">WASSCE Ready</div><div class="ach-desc">All papers complete</div></div>
+        <div class="ach locked"><div class="ach-ico">🔥</div><div class="ach-name">30-Day Streak</div><div class="ach-desc">25 more days</div></div>
+      </div>
+    </div>
+
+    <div style="background:var(--ink);border-radius:var(--radius);padding:28px;color:white;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🎉</div>
+      <div style="font-size:20px;font-weight:800;margin-bottom:4px;">Flow Complete!</div>
+      <div style="font-size:14px;opacity:.7;margin-bottom:20px;">You've explored the full PhorLearn SHS experience.</div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn" style="background:white;color:var(--ink);font-weight:700;" onclick="go(0)">↩ Restart</button>
+        <button class="btn" style="background:rgba(255,255,255,0.12);color:white;border:2px solid rgba(255,255,255,0.2);" onclick="go(3)">← Dashboard</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(7)">← Assessment</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 11. PARENT DASHBOARD ══════════════ -->
+  <div class="panel" id="p10">
+    <div class="eyebrow">Parent Dashboard</div>
+    <div class="h1">Kwame's Overview 👨‍👩‍👦</div>
+    <div class="sub">Monitoring: Sandra Owusu · SHS 3 General Science</div>
+
+    <div class="dash-layout">
+      <div class="widget">
+        <div class="wlabel">Sandra's Performance</div>
+        <div class="prow"><div class="prow-top"><span>Biology</span><span style="color:var(--green);">85%</span></div><div class="pbar"><div class="pfill" style="width:85%;background:var(--green);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>English</span><span style="color:var(--green);">88%</span></div><div class="pbar"><div class="pfill" style="width:88%;background:var(--green);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>Chemistry</span><span style="color:var(--gold);">62%</span></div><div class="pbar"><div class="pfill" style="width:62%;background:var(--gold);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>Elective Maths</span><span>72%</span></div><div class="pbar"><div class="pfill" style="width:72%;"></div></div></div>
+        <div style="margin-top:14px;padding:12px;background:var(--gold-lt);border-radius:10px;font-size:13px;color:var(--gold);font-weight:600;">
+          ⚠️ Chemistry needs attention. Encourage more practice sessions.
+        </div>
+      </div>
+      <div>
+        <div class="widget" style="margin-bottom:14px;">
+          <div class="wlabel">Weekly Activity</div>
+          <div class="stats-row" style="flex-direction:column;">
+            <div class="stat"><div class="stat-n">6h 20m</div><div class="stat-l">Study time</div></div>
+            <div class="stat"><div class="stat-n">18</div><div class="stat-l">Lessons done</div></div>
+            <div class="stat"><div class="stat-n">5🔥</div><div class="stat-l">Day streak</div></div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="wlabel">Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-outline" style="justify-content:center;">📧 Email Report</button>
+            <button class="btn btn-ghost" style="justify-content:center;">📋 Full Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(3)">← Back to Student View</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 12. TEACHER DASHBOARD ══════════════ -->
+  <div class="panel" id="p11">
+    <div class="eyebrow">Teacher Dashboard</div>
+    <div class="h1">Class Overview 🖊️</div>
+    <div class="sub">SHS 3 · Elective Mathematics · 32 Students</div>
+
+    <div class="dash-layout">
+      <div class="widget">
+        <div class="wlabel">Student Performance</div>
+        <div class="class-row">
+          <div class="avatar">AO</div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:700;">Akosua Owusu</div><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:88%;background:var(--green);"></div></div></div>
+          <span class="pill pill-green">88%</span>
+        </div>
+        <div class="class-row">
+          <div class="avatar">KM</div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:700;">Kofi Mensah</div><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:72%;"></div></div></div>
+          <span class="pill pill-blue">72%</span>
+        </div>
+        <div class="class-row">
+          <div class="avatar">AA</div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:700;">Ama Asante</div><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:55%;background:var(--gold);"></div></div></div>
+          <span class="pill pill-gold">55%</span>
+        </div>
+        <div class="class-row">
+          <div class="avatar">JB</div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:700;">Joseph Boateng</div><div class="pbar" style="margin-top:4px;"><div class="pfill" style="width:45%;background:var(--red);"></div></div></div>
+          <span class="pill pill-red">45%</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px;">+ 28 more students</div>
+      </div>
+      <div>
+        <div class="widget" style="margin-bottom:14px;">
+          <div class="wlabel">Class Stats</div>
+          <div class="stats-row" style="flex-direction:column;">
+            <div class="stat"><div class="stat-n">32</div><div class="stat-l">Students</div></div>
+            <div class="stat"><div class="stat-n">72%</div><div class="stat-l">Class Avg</div></div>
+            <div class="stat"><div class="stat-n">5</div><div class="stat-l">Assignments</div></div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="wlabel">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary" style="justify-content:center;">+ Upload Lesson</button>
+            <button class="btn btn-outline" style="justify-content:center;">📝 Set Assignment</button>
+            <button class="btn btn-ghost" style="justify-content:center;">📊 Full Analytics</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(3)">← Back to Student View</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ 13. ADMIN DASHBOARD ══════════════ -->
+  <div class="panel" id="p12">
+    <div class="eyebrow">Admin Dashboard</div>
+    <div class="h1">Platform Overview 🛡️</div>
+    <div class="sub">PhorLearn SHS · Real-time statistics</div>
+
+    <div class="g4" style="margin-bottom:20px;">
+      <div class="admin-stat"><div class="admin-stat-n">12,458</div><div class="admin-stat-l">Total Users</div></div>
+      <div class="admin-stat" style="border-color:var(--green);"><div class="admin-stat-n">3,215</div><div class="admin-stat-l">Active Today</div></div>
+      <div class="admin-stat" style="border-color:var(--gold);"><div class="admin-stat-n">432</div><div class="admin-stat-l">Lessons</div></div>
+      <div class="admin-stat" style="border-color:#7C3AED;"><div class="admin-stat-n">8,921</div><div class="admin-stat-l">Resources</div></div>
+    </div>
+
+    <div class="dash-layout">
+      <div class="widget">
+        <div class="wlabel">Platform Breakdown</div>
+        <div class="prow"><div class="prow-top"><span>SHS 3</span><span>45%</span></div><div class="pbar"><div class="pfill" style="width:45%;"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>SHS 2</span><span>35%</span></div><div class="pbar"><div class="pfill" style="width:35%;background:var(--green);"></div></div></div>
+        <div class="prow"><div class="prow-top"><span>SHS 1</span><span>20%</span></div><div class="pbar"><div class="pfill" style="width:20%;background:var(--gold);"></div></div></div>
+        <div style="margin-top:16px;">
+          <div class="wlabel">Top Subjects (by activity)</div>
+          <div style="font-size:13px;line-height:2.2;color:var(--ink2);">
+            1. Elective Maths · 2,841 sessions<br>
+            2. Biology · 2,204 sessions<br>
+            3. English · 1,988 sessions<br>
+            4. Chemistry · 1,701 sessions
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="widget" style="margin-bottom:14px;">
+          <div class="wlabel">User Growth</div>
+          <div style="font-size:13px;color:var(--muted);line-height:2;">
+            This month: <strong style="color:var(--green);">+1,240</strong><br>
+            Last month: +980<br>
+            Retention rate: <strong>74%</strong>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="wlabel">Admin Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary" style="justify-content:center;">👤 Manage Users</button>
+            <button class="btn btn-outline" style="justify-content:center;">📋 Content Review</button>
+            <button class="btn btn-ghost" style="justify-content:center;">📊 Export Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="go(3)">← Back to Student View</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+const STEPS = [
+  {l:'Splash'},
+  {l:'Role'},
+  {l:'Sign Up'},
+  {l:'Dashboard'},
+  {l:'Subjects'},
+  {l:'Lessons'},
+  {l:'Past Qs'},
+  {l:'Quiz'},
+  {l:'Career'},
+  {l:'Progress'},
+];
+
+let cur = 0;
+
+function buildStepper() {
+  const s = document.getElementById('stepper');
+  s.innerHTML = STEPS.map((st,i) => `
+    <div class="st ${i<cur?'done':i===cur?'active':''}" onclick="go(${i})">
+      <div class="st-dot">${i<cur?'✓':i+1}</div>
+      <div class="st-lbl">${st.l}</div>
+    </div>`).join('');
+}
+
+function buildBread() {
+  const b = document.getElementById('bread');
+  const steps = STEPS.slice(0, Math.min(cur+1, STEPS.length));
+  b.innerHTML = steps.map((st,i)=>{
+    const last = i===steps.length-1;
+    return `${i>0?'<span class="sep">›</span>':''}<span class="${last?'active':''}" onclick="go(${i})">${st.l}</span>`;
+  }).join('');
+}
+
+function go(n) {
+  document.getElementById('p'+cur).classList.remove('active');
+  cur = n;
+  // For sub-dashboards (10,11,12) keep stepper at step 3
+  const stepIdx = n <= 9 ? n : 3;
+  document.getElementById('p'+cur).classList.add('active');
+  buildStepper2(stepIdx);
+  buildBread();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildStepper2(active) {
+  const s = document.getElementById('stepper');
+  s.innerHTML = STEPS.map((st,i) => `
+    <div class="st ${i<active?'done':i===active?'active':''}" onclick="go(${i})">
+      <div class="st-dot">${i<active?'✓':i+1}</div>
+      <div class="st-lbl">${st.l}</div>
+    </div>`).join('');
+}
+
+function pickRole(r, el) {
+  document.querySelectorAll('#p1 .card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  setTimeout(()=>go(2),320);
+}
+
+function swTab(t) {
+  const up = t==='up';
+  document.getElementById('t-up').className='tab-btn'+(up?' on':'');
+  document.getElementById('t-in').className='tab-btn'+(!up?' on':'');
+  document.getElementById('f-up').style.display=up?'block':'none';
+  document.getElementById('f-in').style.display=!up?'block':'none';
+}
+
+function pick(el, v) {
+  document.querySelectorAll('.q-opt').forEach(o=>{o.classList.remove('correct','wrong');});
+  el.classList.add(v==='c'?'correct':'wrong');
+  document.getElementById('q-feedback').style.display='block';
+}
+
+buildStepper();
+buildBread();
+
+/* ── GEMINI AI STUDY HELPER ── */
+let geminiKey = '';
+let chatHistory = [];
+
+const LESSON_CONTEXT = `You are a WASSCE study assistant for Ghana SHS 3 students. 
+The student is currently studying Elective Mathematics — topic: Definite Integrals (Integration). 
+Give clear, concise explanations with worked examples where relevant. 
+Keep responses under 160 words. Be encouraging and use simple language. 
+Reference WASSCE exam style where helpful.`;
+
+function saveKey() {
+  const k = document.getElementById('gemini-key-input').value.trim();
+  if (!k) return;
+  geminiKey = k;
+  document.getElementById('apikey-setup').style.display = 'none';
+  addBubble('ai', '✅ Gemini activated! I\'m ready to help you with Definite Integrals and any WASSCE Elective Maths questions.');
+}
+
+function addBubble(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = role === 'ai' ? 'chat-bubble-ai' : 'chat-bubble-user';
+  div.innerHTML = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const userMsg = inp.value.trim();
+  if (!userMsg) return;
+  inp.value = '';
+
+  addBubble('user', userMsg);
+  chatHistory.push({ role: 'user', parts: [{ text: userMsg }] });
+
+  if (!geminiKey) {
+    addBubble('ai', '⚠️ Please enter your free Gemini API key above to activate live AI responses.');
+    return;
+  }
+
+  document.getElementById('chat-thinking').style.display = 'block';
+
+  try {
+    const payload = {
+      system_instruction: { parts: [{ text: LESSON_CONTEXT }] },
+      contents: chatHistory,
+      generationConfig: { maxOutputTokens: 300, temperature: 0.7 }
+    };
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+    );
+
+    const data = await res.json();
+
+    if (data.error) {
+      addBubble('ai', `❌ Error: ${data.error.message}. Check your API key.`);
+      document.getElementById('chat-thinking').style.display = 'none';
+      return;
+    }
+
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not generate a response.';
+    chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+    document.getElementById('chat-thinking').style.display = 'none';
+    addBubble('ai', reply.replace(/\n/g, '<br>'));
+
+  } catch (err) {
+    document.getElementById('chat-thinking').style.display = 'none';
+    addBubble('ai', '❌ Network error. Check your connection and API key.');
+  }
+}
+</script>
+</body>
+</html>
