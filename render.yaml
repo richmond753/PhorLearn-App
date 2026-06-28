@@ -1,0 +1,42 @@
+# Render Blueprint for PhorLearn App (Next.js 15)
+# Docs: https://render.com/docs/blueprint-spec
+#
+# The app lives in the phorlearn-app/ subdirectory and needs a cloud MySQL
+# database (Render has no managed MySQL — use TiDB Cloud Serverless, Aiven,
+# Clever Cloud, etc. and paste its credentials into the env vars below).
+services:
+  - type: web
+    name: phorlearn-app
+    runtime: node
+    plan: free
+    rootDir: phorlearn-app
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Auto-generated 32+ char secret used to sign session cookies (JWT).
+      - key: AUTH_SECRET
+        generateValue: true
+      # Paste your free Gemini API key (aistudio.google.com/app/apikey).
+      - key: GEMINI_API_KEY
+        sync: false
+      # ── Cloud MySQL connection (fill in from your DB provider) ──
+      - key: MYSQL_HOST
+        sync: false
+      - key: MYSQL_PORT
+        value: "3306"
+      - key: MYSQL_USER
+        sync: false
+      - key: MYSQL_PASSWORD
+        sync: false
+      - key: MYSQL_DATABASE
+        sync: false
+      # Managed MySQL requires TLS.
+      - key: MYSQL_SSL
+        value: "true"
+      # Uncomment (set to "false") only if your provider uses a self-signed cert.
+      # - key: MYSQL_SSL_REJECT_UNAUTHORIZED
+      #   value: "false"
