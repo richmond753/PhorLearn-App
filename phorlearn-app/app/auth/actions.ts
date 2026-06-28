@@ -132,3 +132,51 @@ export async function signOutAction() {
   revalidatePath("/", "layout");
   redirect("/login");
 }
+
+/**
+ * Self-service password reset. This prototype has no email service, so the
+ * user proves ownership with their email and sets a new password directly.
+ * In production this would be gated behind an emailed, time-limited token.
+ */
+export async function resetPasswordAction(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirm_password") ?? "");
+
+  if (!email || !password) {
+    return { error: "Enter your email and a new password." };
+  }
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters." };
+  }
+  if (password !== confirmPassword) {
+    return { error: "The two passwords do not match." };
+  }
+
+  try {
+    const users = await query<{ id: string }>(
+      "select id from users where email = ? limit 1",
+      [email]
+    );
+    const user = users[0];
+    // Don't reveal whether the email exists — respond the same either way,
+    // but only actually update when we find a matching account.
+    if (user) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      await query("update users set password_hash = ? where id = ?", [
+        passwordHash,
+        user.id,
+      ]);
+    }
+  } catch (e) {
+    return {
+      error: e instanceof Error ? e.message : "Could not reset your password.",
+    };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/login?reset=1");
+}

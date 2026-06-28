@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { requireProfile } from "@/lib/auth";
-import { LESSON_SUBJECTS, type LessonSubject } from "@/lib/lessons";
+import {
+  LESSON_SUBJECTS,
+  electivesForProgramme,
+  type LessonSubject,
+} from "@/lib/lessons";
 import { DashboardShell, PageHead, Widget } from "@/components/DashboardShell";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +45,7 @@ export default async function SubjectHubPage() {
     : "SHS";
 
   const core = LESSON_SUBJECTS.filter((s) => s.category === "core");
-  const elective = LESSON_SUBJECTS.filter((s) => s.category === "elective");
+  const elective = electivesForProgramme(programme);
 
   return (
     <DashboardShell profile={profile}>
@@ -94,12 +98,20 @@ export default async function SubjectHubPage() {
         </div>
       </Widget>
 
-      <Widget label="Elective Subjects — General Science">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {elective.map((s) => (
-            <SubjectCard key={s.slug} s={s} />
-          ))}
-        </div>
+      <Widget label={`Elective Subjects — ${programme}`}>
+        {elective.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {elective.map((s) => (
+              <SubjectCard key={s.slug} s={s} />
+            ))}
+          </div>
+        ) : (
+          <p className="py-6 text-center text-sm text-muted">
+            Elective lessons for the {programme} programme are being added. Your
+            core subjects above apply to every programme — keep studying those in
+            the meantime.
+          </p>
+        )}
       </Widget>
 
     </DashboardShell>

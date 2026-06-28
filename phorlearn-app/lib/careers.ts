@@ -99,6 +99,15 @@ export interface ResourceLink {
   icon: string;
   label: string;
   description: string;
+  url: string;
+}
+
+function googleSearch(query: string): string {
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+function youtubeSearch(query: string): string {
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 }
 
 export const RESOURCE_LIBRARY: ResourceLink[] = [
@@ -106,20 +115,36 @@ export const RESOURCE_LIBRARY: ResourceLink[] = [
     icon: "📁",
     label: "University Brochures",
     description: "Programme guides and prospectuses from Ghanaian universities.",
+    url: googleSearch("Ghana university undergraduate admissions prospectus brochure 2026"),
   },
   {
     icon: "📋",
     label: "Cut-off Points",
     description: "Recent admission aggregate cut-off points by programme.",
+    url: googleSearch("WASSCE university cut off points Ghana 2026 by programme"),
   },
   {
     icon: "🎥",
     label: "Career Videos",
     description: "Hear from professionals about their day-to-day work.",
+    url: youtubeSearch("career guidance Ghana professionals day in the life"),
   },
   {
-    icon: "📝",
+    icon: "🎓",
     label: "Scholarship Info",
-    description: "Local and international scholarship opportunities and deadlines.",
+    description: "Local & international scholarships — Ghana Scholarships Authority.",
+    url: "https://scholarships.gov.gh/",
+  },
+  {
+    icon: "💸",
+    label: "MTN Bright Scholarship",
+    description: "Scholarship for students at public tertiary institutions.",
+    url: "https://scholarship.mtn.com.gh/",
+  },
+  {
+    icon: "📊",
+    label: "Programme & Course Finder",
+    description: "Explore tertiary programmes and the subjects they require.",
+    url: googleSearch("Ghana tertiary programmes requirements WASSCE subjects university"),
   },
 ];

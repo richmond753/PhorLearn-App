@@ -6,6 +6,7 @@ import {
   Widget,
   ProgressRow,
 } from "@/components/DashboardShell";
+import AdminActions from "./AdminActions";
 
 export const dynamic = "force-dynamic";
 
@@ -150,17 +151,7 @@ export default async function AdminDashboard() {
                 </div>
               </Widget>
               <Widget label="Admin Actions">
-                <div className="flex flex-col gap-2 text-sm font-bold">
-                  <button className="rounded-lg bg-brand py-2.5 text-white transition hover:bg-[#1340B8]">
-                    👤 Manage Users
-                  </button>
-                  <button className="rounded-lg border-2 border-brand py-2.5 text-brand transition hover:bg-brand-lt">
-                    📋 Content Review
-                  </button>
-                  <button className="rounded-lg border-2 border-line py-2.5 text-muted transition hover:border-brand hover:text-brand">
-                    📊 Export Report
-                  </button>
-                </div>
+                <AdminActions stats={s} topSubjects={top} />
               </Widget>
             </div>
           </div>

@@ -10,7 +10,8 @@ export type ResourceType =
   | "curriculum"
   | "pastq"
   | "textbook"
-  | "video";
+  | "video"
+  | "platform";
 
 export interface StudyResource {
   type: ResourceType;
@@ -31,6 +32,7 @@ export const RESOURCE_TYPE_META: Record<ResourceType, ResourceTypeMeta> = {
   pastq: { label: "Past Questions", icon: "📝", color: "#D4A017" },
   textbook: { label: "Textbook / Manual", icon: "📚", color: "#16A34A" },
   video: { label: "Video Lessons", icon: "📹", color: "#DC2626" },
+  platform: { label: "Learning Platform", icon: "🧭", color: "#0EA5E9" },
 };
 
 function youtube(query: string): string {
@@ -48,6 +50,14 @@ export const GENERAL_RESOURCES: StudyResource[] = [
       "Official standards-based SHS 1–3 curriculum, approved textbooks and teaching resources.",
   },
   {
+    type: "curriculum",
+    title: "WAEC Ghana — Official Site",
+    provider: "West African Examinations Council",
+    url: "https://www.waecgh.org/",
+    description:
+      "Exam syllabuses, timetables, regulations and the official WASSCE grading information.",
+  },
+  {
     type: "pastq",
     title: "WASSCE Past Papers — All Subjects",
     provider: "GH Results",
@@ -61,6 +71,70 @@ export const GENERAL_RESOURCES: StudyResource[] = [
     provider: "SolvedPasco",
     url: "https://solvedpasco.com/wassce-past-questions/",
     description: "Objective and essay past questions organised by subject and year.",
+  },
+  {
+    type: "pastq",
+    title: "Free Past Questions & Mocks",
+    provider: "Passco Ghana",
+    url: "https://passco.com.gh/past-questions",
+    description:
+      "Free BECE & WASSCE past questions and school mock papers (2010–2025), all subjects.",
+  },
+  {
+    type: "pastq",
+    title: "Largest WASSCE/WAEC Past Questions Archive",
+    provider: "LarnEdu",
+    url: "https://www.larnedu.com/wassce-waec-past-practice-questions/",
+    description:
+      "Independent archive of WASSCE past papers (PDF) plus online practice quizzes by subject.",
+  },
+  {
+    type: "platform",
+    title: "Olearna — Exam Readiness Platform",
+    provider: "Olearna",
+    url: "https://olearna.com/",
+    description:
+      "GES-aligned diagnostics, adaptive practice across 21+ subjects and a free readiness tier.",
+  },
+  {
+    type: "platform",
+    title: "GhLearner — Practice Anywhere",
+    provider: "GhLearner",
+    url: "https://ghlearner.com/",
+    description:
+      "Free past questions and mocks across WhatsApp bot, web and mobile, with offline support.",
+  },
+  {
+    type: "platform",
+    title: "SyllabusGH — AI Tutor & Pasco",
+    provider: "SyllabusGH",
+    url: "https://syllabusgh.com/",
+    description:
+      "Curriculum-aligned notes, quizzes, an offline past-questions library and a 24/7 AI tutor.",
+  },
+  {
+    type: "platform",
+    title: "Klingbo — AI WASSCE Prep",
+    provider: "Klingbo Intelligence",
+    url: "https://www.klingbo.com/wassce",
+    description:
+      "Free AI tutoring, 15+ years of past questions, timed mocks and a smart study timetable.",
+  },
+  {
+    type: "platform",
+    title: "Studyxo SHS — Smart Study App",
+    provider: "Studyxo",
+    url: "https://studyxo.com/",
+    description:
+      "Offline mock tests, study planner and A1–F9 grade tracking for SHS 1–3 students.",
+  },
+  {
+    type: "platform",
+    title: "Khan Academy — Free Lessons",
+    provider: "Khan Academy",
+    url: "https://www.khanacademy.org/",
+    description:
+      "Free world-class video lessons and practice in maths, science and more — works on low data.",
   },
 ];
 
@@ -95,6 +169,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       url: youtube("WASSCE Core Mathematics past questions solved Ghana"),
       description: "Worked-solution videos for common WASSCE maths topics.",
     },
+    {
+      type: "platform",
+      title: "Khan Academy — Mathematics",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/math",
+      description: "Free practice and videos on arithmetic, algebra, geometry and statistics.",
+    },
   ],
   english: [
     {
@@ -117,6 +198,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       provider: "YouTube",
       url: youtube("WASSCE English Language comprehension summary essay Ghana"),
       description: "Comprehension, summary, lexis and structure walkthroughs.",
+    },
+    {
+      type: "platform",
+      title: "Khan Academy — Grammar",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/humanities/grammar",
+      description: "Free grammar, parts of speech and punctuation practice to sharpen structure.",
     },
   ],
   "integrated-science": [
@@ -141,6 +229,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       url: youtube("WASSCE Integrated Science revision Ghana past questions"),
       description: "Topic revision and practical-work explanations.",
     },
+    {
+      type: "platform",
+      title: "Khan Academy — Science",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/science",
+      description: "Free biology, chemistry and physics lessons covering integrated-science topics.",
+    },
   ],
   "social-studies": [
     {
@@ -164,6 +259,20 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       url: youtube("WASSCE Social Studies Ghana revision past questions"),
       description: "Governance, nationalism and development topic revision.",
     },
+    {
+      type: "curriculum",
+      title: "SHS Economics Teacher Manual (NaCCA)",
+      provider: "Ministry of Education · NaCCA",
+      url: "https://curriculumresources.edu.gh/wp-content/uploads/2024/09/Economicspdf.pdf",
+      description: "Related social-science elective — Year One economics content (PDF).",
+    },
+    {
+      type: "curriculum",
+      title: "SHS Geography Teacher Manual (NaCCA)",
+      provider: "Ministry of Education · NaCCA",
+      url: "https://curriculumresources.edu.gh/wp-content/uploads/2024/10/Geography.pdf",
+      description: "Related elective — physical and human geography of Ghana (PDF).",
+    },
   ],
   ict: [
     {
@@ -179,6 +288,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       provider: "YouTube",
       url: youtube("WASSCE ICT Ghana past questions revision"),
       description: "Hardware, software and applications topic walkthroughs.",
+    },
+    {
+      type: "platform",
+      title: "Khan Academy — Computers & Internet",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/computing/computers-and-internet",
+      description: "Free lessons on how computers, networks and the internet work.",
     },
   ],
   "elective-maths": [
@@ -203,6 +319,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       url: youtube("WASSCE Elective Mathematics Ghana solved past questions"),
       description: "Calculus, vectors and probability worked solutions.",
     },
+    {
+      type: "platform",
+      title: "Khan Academy — Calculus & Algebra",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/math/calculus-1",
+      description: "Free differentiation, integration and advanced algebra practice.",
+    },
   ],
   physics: [
     {
@@ -225,6 +348,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       provider: "YouTube",
       url: youtube("WASSCE Physics Ghana past questions solved"),
       description: "Mechanics, electricity and waves explanations.",
+    },
+    {
+      type: "platform",
+      title: "Khan Academy — Physics",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/science/physics",
+      description: "Free lessons on motion, forces, energy, electricity and waves.",
     },
   ],
   chemistry: [
@@ -249,6 +379,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       url: youtube("WASSCE Chemistry Ghana past questions solved"),
       description: "Bonding, reactions and organic chemistry walkthroughs.",
     },
+    {
+      type: "platform",
+      title: "Khan Academy — Chemistry",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/science/chemistry",
+      description: "Free lessons on atomic structure, the mole, bonding and reactions.",
+    },
   ],
   biology: [
     {
@@ -271,6 +408,13 @@ export const SUBJECT_RESOURCES: Record<string, StudyResource[]> = {
       provider: "YouTube",
       url: youtube("WASSCE Biology Ghana past questions solved"),
       description: "Cell biology, ecology and physiology topic revision.",
+    },
+    {
+      type: "platform",
+      title: "Khan Academy — Biology",
+      provider: "Khan Academy",
+      url: "https://www.khanacademy.org/science/biology",
+      description: "Free lessons on cells, genetics, ecology and human physiology.",
     },
   ],
 };

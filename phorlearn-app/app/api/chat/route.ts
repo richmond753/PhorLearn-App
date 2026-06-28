@@ -21,10 +21,15 @@ function rateLimited(userId: string): boolean {
   return entry.count > RATE_LIMIT;
 }
 
-// NOTE: The original brief specified "gemini-1.5-flash". That model has since
-// been retired on the Generative Language API, so we use a current free-tier
-// flash model. Change this single constant if Google updates the model name.
-const GEMINI_MODEL = "gemini-2.5-flash";
+// Free-tier Gemini models, tried in order. The newest free flash model
+// (gemini-2.5-flash) is primary; we fall back to its lite sibling and the
+// older 1.5 flash so the helper keeps working if a model is busy, rate-limited
+// or renamed. Override the primary with the GEMINI_MODEL env var if needed.
+const GEMINI_MODELS = [
+  process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-1.5-flash",
+].filter((m, i, arr) => m && arr.indexOf(m) === i);
 
 interface ChatMessage {
   role: "user" | "ai";
@@ -112,51 +117,62 @@ export async function POST(req: Request) {
     );
   }
 
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: GEMINI_MODEL,
-      systemInstruction: systemPrompt(subject, topic),
+  // Map prior turns to Gemini's format. History must start with a user turn,
+  // so drop any leading assistant (greeting) messages.
+  const history = (body.history ?? [])
+    .map((m) => ({
+      role: m.role === "ai" ? ("model" as const) : ("user" as const),
+      parts: [{ text: m.text }],
+    }))
+    .filter((_, i, arr) => {
+      // trim leading model messages
+      const firstUser = arr.findIndex((x) => x.role === "user");
+      return firstUser === -1 ? false : i >= firstUser;
     });
 
-    // Map prior turns to Gemini's format. History must start with a user turn,
-    // so drop any leading assistant (greeting) messages.
-    const history = (body.history ?? [])
-      .map((m) => ({
-        role: m.role === "ai" ? ("model" as const) : ("user" as const),
-        parts: [{ text: m.text }],
-      }))
-      .filter((_, i, arr) => {
-        // trim leading model messages
-        const firstUser = arr.findIndex((x) => x.role === "user");
-        return firstUser === -1 ? false : i >= firstUser;
-      });
+  const genAI = new GoogleGenerativeAI(apiKey);
+  let reply: string | null = null;
+  let lastError: unknown = null;
 
-    const chat = model.startChat({
-      history,
-      generationConfig: { maxOutputTokens: 400, temperature: 0.7 },
-    });
-
-    const result = await chat.sendMessage(message);
-    const reply = result.response.text();
-
-    // Persist the turn so the conversation survives reloads. Best-effort:
-    // a storage hiccup must not break the chat response itself.
+  // Try each free model in turn until one responds.
+  for (const modelName of GEMINI_MODELS) {
     try {
-      await supabase.from("chat_messages").insert([
-        { user_id: user.id, subject, topic, role: "user", text: message },
-        { user_id: user.id, subject, topic, role: "ai", text: reply },
-      ]);
-    } catch {
-      // ignore — reply is still returned to the user
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction: systemPrompt(subject, topic),
+      });
+      const chat = model.startChat({
+        history,
+        generationConfig: { maxOutputTokens: 400, temperature: 0.7 },
+      });
+      const result = await chat.sendMessage(message);
+      reply = result.response.text();
+      if (reply) break;
+    } catch (err) {
+      lastError = err;
+      // Try the next model in the fallback list.
     }
+  }
 
-    return Response.json({ reply });
-  } catch (err) {
-    const detail = err instanceof Error ? err.message : "Unknown error";
+  if (!reply) {
+    const detail =
+      lastError instanceof Error ? lastError.message : "Unknown error";
     return Response.json(
       { error: `The AI service could not respond. ${detail}` },
       { status: 502 }
     );
   }
+
+  // Persist the turn so the conversation survives reloads. Best-effort:
+  // a storage hiccup must not break the chat response itself.
+  try {
+    await supabase.from("chat_messages").insert([
+      { user_id: user.id, subject, topic, role: "user", text: message },
+      { user_id: user.id, subject, topic, role: "ai", text: reply },
+    ]);
+  } catch {
+    // ignore — reply is still returned to the user
+  }
+
+  return Response.json({ reply });
 }

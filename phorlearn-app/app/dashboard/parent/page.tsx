@@ -7,6 +7,7 @@ import {
   ProgressRow,
   Stat,
 } from "@/components/DashboardShell";
+import ParentReportButton from "./ParentReportButton";
 
 export const dynamic = "force-dynamic";
 
@@ -144,11 +145,26 @@ export default async function ParentDashboard() {
                   href={mailto}
                   className="rounded-lg bg-brand py-2.5 text-center text-white transition hover:bg-[#1340B8]"
                 >
-                  📧 Email Report
+                  <span aria-hidden="true">📧 </span>Email Report
                 </a>
-                <button className="rounded-lg border-2 border-line py-2.5 text-muted transition hover:border-brand hover:text-brand">
-                  📋 Full Report
-                </button>
+                <ParentReportButton
+                  ward={{
+                    full_name: ward.full_name,
+                    classLabel,
+                    programme: ward.programme,
+                    study_label: formatStudyTime(ward.study_minutes),
+                    lessons_done: ward.lessons_done,
+                    streak_days: ward.streak_days,
+                  }}
+                  subjects={subjects.map((s) => ({
+                    subject: s.subject,
+                    score: s.score,
+                  }))}
+                  focusAreas={focusAreas.map((s) => ({
+                    subject: s.subject,
+                    score: s.score,
+                  }))}
+                />
               </div>
             </Widget>
           </div>

@@ -54,20 +54,30 @@ export default async function CareerGuidancePage() {
       </div>
 
       <Widget label="Resource Library" className="mt-4">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {RESOURCE_LIBRARY.map((r) => (
-            <button
+            <a
               key={r.label}
-              className="rounded-[10px] border-2 border-line bg-white p-4 text-left transition hover:border-brand hover:bg-brand-lt"
+              href={r.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-[10px] border-2 border-line bg-white p-4 text-left transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand-lt"
             >
-              <div className="text-2xl">{r.icon}</div>
+              <div className="flex items-start justify-between">
+                <div className="text-2xl" aria-hidden="true">
+                  {r.icon}
+                </div>
+                <span className="text-muted transition group-hover:text-brand">
+                  ↗
+                </span>
+              </div>
               <div className="mt-1.5 text-[13px] font-bold text-ink">
                 {r.label}
               </div>
               <div className="mt-0.5 text-[11px] leading-snug text-muted">
                 {r.description}
               </div>
-            </button>
+            </a>
           ))}
         </div>
       </Widget>

@@ -23,6 +23,19 @@ export interface LessonSubject {
   category: "core" | "elective";
   blurb: string;
   topics: Topic[];
+  // Programmes this elective belongs to. Core subjects apply to every
+  // programme, so they omit this field. Used to show students only the
+  // electives relevant to their chosen programme.
+  programmes?: string[];
+}
+
+/** Returns the elective subjects offered for a given programme. */
+export function electivesForProgramme(programme: string): LessonSubject[] {
+  return LESSON_SUBJECTS.filter(
+    (s) =>
+      s.category === "elective" &&
+      (!s.programmes || s.programmes.includes(programme))
+  );
 }
 
 export const LESSON_SUBJECTS: LessonSubject[] = [
@@ -218,6 +231,7 @@ export const LESSON_SUBJECTS: LessonSubject[] = [
     icon: "📐",
     color: "#1B4FD8",
     category: "elective",
+    programmes: ["General Science", "Technical"],
     blurb: "Calculus, sequences and advanced algebra.",
     topics: [
       {
@@ -276,6 +290,7 @@ export const LESSON_SUBJECTS: LessonSubject[] = [
     icon: "⚡",
     color: "#7C3AED",
     category: "elective",
+    programmes: ["General Science", "Technical"],
     blurb: "Mechanics, energy and electricity.",
     topics: [
       {
@@ -331,6 +346,7 @@ export const LESSON_SUBJECTS: LessonSubject[] = [
     icon: "⚗️",
     color: "#BE123C",
     category: "elective",
+    programmes: ["General Science"],
     blurb: "Atomic structure, the mole and reactions.",
     topics: [
       {
@@ -372,6 +388,7 @@ export const LESSON_SUBJECTS: LessonSubject[] = [
     icon: "🔬",
     color: "#16A34A",
     category: "elective",
+    programmes: ["General Science"],
     blurb: "Cells, life processes and genetics.",
     topics: [
       {

@@ -2,52 +2,33 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { Logo } from "@/components/Logo";
-import { loginAction, type AuthState } from "@/app/auth/actions";
+import { resetPasswordAction, type AuthState } from "@/app/auth/actions";
 
 const initialState: AuthState = {};
 
-function LoginForm() {
-  const params = useSearchParams();
-  const justRegistered = params.get("registered") === "1";
-  const justReset = params.get("reset") === "1";
+function ResetForm() {
   const [showPw, setShowPw] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [state, formAction, pending] = useActionState(
-    loginAction,
+    resetPasswordAction,
     initialState
   );
+
+  const mismatch = confirm.length > 0 && password !== confirm;
 
   return (
     <main className="mx-auto max-w-md px-5 py-12">
       <p className="mb-1 text-[11px] font-bold uppercase tracking-[1.4px] text-brand">
-        Welcome back
+        Account recovery
       </p>
-      <h1 className="mb-1 text-3xl font-extrabold tracking-tight">Log in</h1>
+      <h1 className="mb-1 text-3xl font-extrabold tracking-tight">
+        Reset password
+      </h1>
       <p className="mb-7 text-sm text-muted">
-        Continue your WASSCE preparation.
+        Enter your email and choose a new password to regain access.
       </p>
-
-      {justRegistered && (
-        <p
-          role="status"
-          className="mb-5 rounded-lg bg-success-lt px-3 py-2 text-sm font-medium text-success"
-        >
-          <span aria-hidden="true">✅ </span>Account created. Please log in to
-          continue.
-        </p>
-      )}
-
-      {justReset && (
-        <p
-          role="status"
-          className="mb-5 rounded-lg bg-success-lt px-3 py-2 text-sm font-medium text-success"
-        >
-          <span aria-hidden="true">✅ </span>Password reset. Log in with your new
-          password.
-        </p>
-      )}
 
       <form action={formAction} className="rounded-xl bg-white p-6 shadow-card">
         <div className="mb-4">
@@ -69,28 +50,23 @@ function LoginForm() {
         </div>
 
         <div className="mb-4">
-          <div className="mb-1.5 flex items-center justify-between">
-            <label
-              htmlFor="password"
-              className="block text-xs font-bold tracking-wide text-ink2"
-            >
-              Password
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-[11px] font-bold text-brand transition hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <label
+            htmlFor="password"
+            className="mb-1.5 block text-xs font-bold tracking-wide text-ink2"
+          >
+            New password
+          </label>
           <div className="relative">
             <input
               id="password"
               name="password"
               type={showPw ? "text" : "password"}
               required
-              autoComplete="current-password"
-              placeholder="Your password"
+              minLength={6}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
               className="finput pr-16"
             />
             <button
@@ -104,6 +80,32 @@ function LoginForm() {
           </div>
         </div>
 
+        <div className="mb-4">
+          <label
+            htmlFor="confirm_password"
+            className="mb-1.5 block text-xs font-bold tracking-wide text-ink2"
+          >
+            Confirm new password
+          </label>
+          <input
+            id="confirm_password"
+            name="confirm_password"
+            type={showPw ? "text" : "password"}
+            required
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            placeholder="Re-enter your new password"
+            aria-invalid={mismatch}
+            className={`finput ${mismatch ? "border-danger" : ""}`}
+          />
+          {mismatch && (
+            <p role="alert" className="mt-1 text-xs font-medium text-danger">
+              The two passwords do not match.
+            </p>
+          )}
+        </div>
+
         {state.error && (
           <p
             role="alert"
@@ -115,38 +117,36 @@ function LoginForm() {
 
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || mismatch}
           className="w-full rounded-lg bg-brand py-3 text-sm font-bold text-white transition hover:bg-[#1340B8] disabled:opacity-60"
         >
-          {pending ? "Logging in…" : "Log In →"}
+          {pending ? "Resetting…" : "Reset password →"}
         </button>
       </form>
 
       <p className="mt-5 text-center text-sm text-muted">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-bold text-brand">
-          Sign up
+        Remembered it?{" "}
+        <Link href="/login" className="font-bold text-brand">
+          Back to log in
         </Link>
       </p>
     </main>
   );
 }
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-50 flex h-14 items-center gap-5 bg-ink px-7 text-white">
         <Logo />
         <Link
-          href="/signup"
+          href="/login"
           className="ml-auto text-sm text-white/70 transition hover:text-white"
         >
-          Create an account
+          Log in
         </Link>
       </header>
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
+      <ResetForm />
     </div>
   );
 }

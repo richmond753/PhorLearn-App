@@ -22,6 +22,7 @@ const TYPE_FILTERS: { id: ResourceType | "all"; label: string }[] = [
   { id: "pastq", label: "📝 Past Questions" },
   { id: "textbook", label: "📚 Textbooks" },
   { id: "video", label: "📹 Videos" },
+  { id: "platform", label: "🧭 Platforms" },
 ];
 
 function ResourceCard({ r }: { r: StudyResource }) {

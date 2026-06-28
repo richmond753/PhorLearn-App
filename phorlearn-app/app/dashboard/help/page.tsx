@@ -25,7 +25,7 @@ const GENERAL_FAQS: Faq[] = [
   },
   {
     q: "I forgot my password — what do I do?",
-    a: "Password reset is not yet automated in this prototype. Create a new account, or contact your school administrator to help recover access.",
+    a: "On the login screen, tap 'Forgot password?' to open the reset page. Enter your email and choose a new password, then log in with it.",
   },
 ];
 
