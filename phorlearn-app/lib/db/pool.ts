@@ -7,11 +7,23 @@ declare global {
 }
 
 // Managed/cloud MySQL providers (TiDB Cloud, Aiven, Clever Cloud, etc.)
-// require TLS. Enable it by setting MYSQL_SSL=true. Some providers use a
-// self-signed cert chain — set MYSQL_SSL_REJECT_UNAUTHORIZED=false for those.
-// Local development (MySQL Workbench) leaves MYSQL_SSL unset, so SSL is off.
+// require TLS. We enable SSL automatically for any remote host so a cloud DB
+// is never contacted over an insecure connection. Behaviour:
+//   • MYSQL_SSL=true  → force SSL on
+//   • MYSQL_SSL=false → force SSL off
+//   • unset           → SSL on for remote hosts, off for localhost (local dev)
+// For providers with a self-signed chain, set MYSQL_SSL_REJECT_UNAUTHORIZED=false.
 function sslOption(): mysql.PoolOptions["ssl"] {
-  if (process.env.MYSQL_SSL !== "true") return undefined;
+  const host = process.env.MYSQL_HOST ?? "localhost";
+  const isLocal =
+    host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "";
+
+  let useSsl: boolean;
+  if (process.env.MYSQL_SSL === "true") useSsl = true;
+  else if (process.env.MYSQL_SSL === "false") useSsl = false;
+  else useSsl = !isLocal;
+
+  if (!useSsl) return undefined;
   return {
     minVersion: "TLSv1.2",
     rejectUnauthorized: process.env.MYSQL_SSL_REJECT_UNAUTHORIZED !== "false",
