@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     "WAEC",
   ],
   alternates: { canonical: "/" },
+  verification: {
+    google: "PTWbGtrmEfyZSJd5v99qg4Zf1B-jRaRjGntaav70W20",
+  },
   robots: {
     index: true,
     follow: true,
