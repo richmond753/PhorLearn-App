@@ -82,8 +82,7 @@ create table subject_progress (
   updated_at timestamp not null default current_timestamp on update current_timestamp,
   primary key (id),
   unique key uq_progress_user_subject (user_id, subject),
-  constraint fk_progress_user foreign key (user_id) references users (id) on delete cascade,
-  constraint ck_progress_range check (progress between 0 and 100)
+  constraint fk_progress_user foreign key (user_id) references users (id) on delete cascade
 ) engine=innodb default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
 create table weekly_stats (
@@ -182,8 +181,7 @@ create table class_students (
   created_at timestamp not null default current_timestamp,
   primary key (id),
   key idx_cs_class (class_id),
-  constraint fk_cs_class foreign key (class_id) references classes (id) on delete cascade,
-  constraint ck_cs_score check (score between 0 and 100)
+  constraint fk_cs_class foreign key (class_id) references classes (id) on delete cascade
 ) engine=innodb default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
 create table assignments (
@@ -235,8 +233,7 @@ create table ward_subjects (
   sort_order int not null default 0,
   primary key (id),
   key idx_ws_ward (ward_id),
-  constraint fk_ws_ward foreign key (ward_id) references wards (id) on delete cascade,
-  constraint ck_ws_score check (score between 0 and 100)
+  constraint fk_ws_ward foreign key (ward_id) references wards (id) on delete cascade
 ) engine=innodb default charset=utf8mb4 collate=utf8mb4_unicode_ci;
 
 -- 5. Admin: platform statistics ------------------------------
