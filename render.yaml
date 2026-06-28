@@ -10,7 +10,9 @@ services:
     runtime: node
     plan: free
     rootDir: phorlearn-app
-    buildCommand: npm install && npm run build
+    # --include=dev forces devDependencies (TypeScript, Tailwind, PostCSS) to
+    # install even when Render sets NODE_ENV=production, so the build succeeds.
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start
     autoDeploy: true
     healthCheckPath: /
@@ -26,8 +28,9 @@ services:
       # ── Cloud MySQL connection (fill in from your DB provider) ──
       - key: MYSQL_HOST
         sync: false
+      # TiDB Cloud uses 4000. Change to 3306 for Aiven/Clever Cloud/standard MySQL.
       - key: MYSQL_PORT
-        value: "3306"
+        value: "4000"
       - key: MYSQL_USER
         sync: false
       - key: MYSQL_PASSWORD
